@@ -40,9 +40,12 @@ func main() {
 	}
 	defer db.Close()
 
-	// if err := db.Ping(); err != nil {
-	// 	log.Fatal(err)
-	// }
+	// Checking if connection works
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Print("Succes")
+	}
 
 	app := &application{
 		config: cfg,
@@ -55,10 +58,15 @@ func main() {
 func (app *application) run() {
 	router := mux.NewRouter()
 
-	// v1 := router.PathPrefix("/api/v1").Subrouter()
+	v1 := router.PathPrefix("/api/v1").Subrouter()
 
 	// // Menu Singleton
 	// // Create a new menu
+	v1.HandleFunc("/Doctors", app.createDoctorHandler).Methods("POST")
+	v1.HandleFunc("/Doctors", app.getDoctorHandler).Methods("GET")
+	v1.HandleFunc("/Doctors", app.updateDoctorHandler).Methods("PUT")
+	v1.HandleFunc("/Doctors", app.deleteDoctorHandler).Methods("DELETE")
+
 	// v1.HandleFunc("/menus", app.createMenuHandler).Methods("POST")
 	// // Get a specific menu
 	// v1.HandleFunc("/menus/{menuId:[0-9]+}", app.getMenuHandler).Methods("GET")

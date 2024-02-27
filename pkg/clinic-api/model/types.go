@@ -1,3 +1,5 @@
+//! Write in this file your types
+
 package model
 
 import (
