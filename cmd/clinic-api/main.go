@@ -40,6 +40,10 @@ func main() {
 	}
 	defer db.Close()
 
+	// if err := db.Ping(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
 	app := &application{
 		config: cfg,
 		models: model.NewModels(db),
