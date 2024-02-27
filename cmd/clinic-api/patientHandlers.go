@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	/*"github.com/codev0/inft3212-6/pkg/abr-plus/model"*/
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+
+	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
+
+	"github.com/gorilla/mux"
 )
 
 func (app *application) respondWithError(w http.ResponseWriter, code int, message string) {

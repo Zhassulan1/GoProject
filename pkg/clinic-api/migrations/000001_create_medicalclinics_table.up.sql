@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS doctors
     created_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
     updated_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
     name          text                        NOT NULL,
-    specialty     text                        NOT NULL,
+    specialty     text                        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS appointments
