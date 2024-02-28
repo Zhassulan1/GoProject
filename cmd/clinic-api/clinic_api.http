@@ -5,7 +5,7 @@ Content-Type: application/json
 {
     "PatientId": "1",
     "DoctorId": "1",
-    "Date": "2024-01-05",     
+    "Date": "2024/01/05",     
     "StartTime": "02:03:04",
     "EndTime": "03:03:04",
     "Status": "Ok"
