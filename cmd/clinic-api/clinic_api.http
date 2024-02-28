@@ -1,0 +1,51 @@
+### Create Appointment Item
+POST localhost:8081/api/v1/appointments
+Content-Type: application/json
+
+{
+    "PatientId": "1",
+    "DoctorId": "1",
+    "Date": "2024-01-05",     
+    "StartTime": "02:03:04",
+    "EndTime": "03:03:04",
+    "Status": "Ok"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Get Appointment Item
+GET localhost:8081/api/v1/appointments/1
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Update Appointment Item
+PUT localhost:8081/api/v1/appointments/1
+Content-Type: application/json
+
+{
+  "Status": "NOT Ok"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Delete Appointment Item
+DELETE localhost:8081/api/v1/appointments/1
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
