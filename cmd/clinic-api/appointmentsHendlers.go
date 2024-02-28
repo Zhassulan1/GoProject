@@ -62,7 +62,7 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 
 func (app *application) getAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	param := vars["appintmentId"]
+	param := vars["appointmentId"]
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
