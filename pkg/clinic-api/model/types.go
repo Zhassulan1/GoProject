@@ -8,11 +8,11 @@ import (
 )
 
 type Doctor struct {
-	Id         string `json:"id"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
-	Name       string `json:"name"`
-	Specialty  string `json:"specialty"`
+	Id        string `json:"id"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+	Name      string `json:"name"`
+	Specialty string `json:"specialty"`
 }
 
 type DoctorModel struct {
