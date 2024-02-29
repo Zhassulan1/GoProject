@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -13,14 +14,27 @@ func (app *application) respondWithError(w http.ResponseWriter, code int, messag
 	app.respondWithJSON(w, code, map[string]string{"error": message})
 }
 
+func (app *application) readJSON(_ http.ResponseWriter, r *http.Request, dst interface{}) error {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(dst)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (app *application) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 
 	if err != nil {
+		log.Print("Received bad JSON")
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
-
+	log.Print("Successful JSON read")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
@@ -35,7 +49,7 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 		EndTime   string `json:"endTime"`
 		Status    string `json:"status"`
 	}
-
+	log.Print("Creating appointment Item")
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
@@ -50,9 +64,11 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 		EndTime:   input.EndTime,
 		Status:    input.Status,
 	}
-
+	log.Print("Inserting Into DB")
 	err = app.models.Appointments.Insert(appointment)
 	if err != nil {
+		log.Print("Received Error During Insertion:")
+		log.Printf(err.Error())
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
@@ -133,6 +149,8 @@ func (app *application) updateAppointmentHandler(w http.ResponseWriter, r *http.
 
 	err = app.models.Appointments.Update(appointment)
 	if err != nil {
+		log.Print("Could Not Update")
+		log.Print(err.Error())
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
@@ -157,17 +175,4 @@ func (app *application) deleteAppointmentHandler(w http.ResponseWriter, r *http.
 	}
 
 	app.respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
-}
-
-
-func (app *application) readJSON(_ http.ResponseWriter, r *http.Request, dst interface{}) error {
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	err := dec.Decode(dst)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

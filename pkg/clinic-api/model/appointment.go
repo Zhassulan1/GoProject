@@ -8,15 +8,15 @@ import (
 )
 
 type Appointment struct {
-	Id         string `json:"id"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
-	PatientId  string `json:"patientId"`
-	DoctorId   string `json:"doctorId"`
-	Date       string `json:"date"`
-	StartTime  string `json:"startTime"`
-	EndTime    string `json:"endTime"`
-	Status     string `json:"status"`
+	Id        string `json:"id"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+	PatientId string `json:"patientId"`
+	DoctorId  string `json:"doctorId"`
+	Date      string `json:"date"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
+	Status    string `json:"status"`
 }
 
 type AppointmentModel struct {
@@ -31,7 +31,14 @@ func (m AppointmentModel) Insert(appointment *Appointment) error {
 		VALUES ($1, $2, $3, $4, $5, $6) 
 		RETURNING id, created_at, updated_at
 		`
-	args := []interface{}{appointment.PatientId, appointment.DoctorId, appointment.Date, appointment.StartTime, appointment.EndTime, appointment.Status}
+	args := []interface{}{
+		appointment.PatientId,
+		appointment.DoctorId,
+		appointment.Date,
+		appointment.StartTime,
+		appointment.EndTime,
+		appointment.Status,
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -49,7 +56,17 @@ func (m AppointmentModel) Get(id int) (*Appointment, error) {
 	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, query, id)
-	err := row.Scan(&appointment.Id, &appointment.CreatedAt, &appointment.UpdatedAt, &appointment.PatientId, &appointment.DoctorId, &appointment.Date, &appointment.StartTime, &appointment.EndTime, &appointment.Status)
+	err := row.Scan(
+		&appointment.Id,
+		&appointment.CreatedAt,
+		&appointment.UpdatedAt,
+		&appointment.PatientId,
+		&appointment.DoctorId,
+		&appointment.Date,
+		&appointment.StartTime,
+		&appointment.EndTime,
+		&appointment.Status,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +80,15 @@ func (m AppointmentModel) Update(appointment *Appointment) error {
 		WHERE id = $7
 		RETURNING updated_at
 		`
-	args := []interface{}{appointment.PatientId, appointment.DoctorId, appointment.Date, appointment.StartTime, appointment.EndTime, appointment.Status, appointment.Id}
+	args := []interface{}{
+		appointment.PatientId,
+		appointment.DoctorId,
+		appointment.Date,
+		appointment.StartTime,
+		appointment.EndTime,
+		appointment.Status,
+		appointment.Id,
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

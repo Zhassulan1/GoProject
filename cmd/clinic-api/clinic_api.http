@@ -1,5 +1,64 @@
-### Create Appointment Item
-POST localhost:8081/api/v1/appointments
+
+###! Legacy
+### Create Patient Item
+POST localhost:8081/api/v1/patients 
+Content-Type: application/json
+
+{
+    "Name": "John",
+    "Birthdate": "2004/03/25",
+    "Gender": "man"
+}
+
+
+
+
+
+
+
+
+
+
+###! Rewritten part
+
+
+### doctors api calls
+### Get doctors Item
+GET http://localhost:8081/api/v1/doctors/5 HTTP/1.1
+
+### Create doctors Item
+POST http://localhost:8081/api/v1/doctors HTTP/1.1
+Content-Type: application/json
+
+{
+    "Name": "MAX2",
+    "Specialty": "Sergeon2"
+}
+
+
+### Update doctors Item
+PUT http://localhost:8081/api/v1/doctors/6 HTTP/1.1
+Content-Type: application/json
+
+{
+  "Name": "Max3"
+}
+
+
+### Delete doctors Item
+DELETE http://localhost:8081/api/v1/doctors/6 HTTP/1.1
+Content-Type: application/json
+
+
+###? doctors is fully functioning  
+
+
+
+
+
+### appointments api calls
+### Create appointment Item
+POST http://localhost:8081/api/v1/appointments HTTP/1.1
 Content-Type: application/json
 
 {
@@ -10,8 +69,37 @@ Content-Type: application/json
     "EndTime": "03:03:04",
     "Status": "Ok"
 }
-### Create Patient Item
-POST localhost:8081/api/v1/patients
+
+
+### Get appointment Item
+GET http://localhost:8081/api/v1/appointments/7 HTTP/1.1
+
+
+### Update appointment Item
+PUT http://localhost:8081/api/v1/appointments/8 HTTP/1.1
+Content-Type: application/json
+
+{
+    "PatientId": "1",
+    "DoctorId": "1",
+    "Date": "2024/01/05",     
+    "StartTime": "02:03:04",
+    "EndTime": "03:03:04",
+    "Status": "Ok"
+}
+
+### Delete appointment Item
+DELETE http://localhost:8081/api/v1/appointments/7 HTTP/1.1
+Content-Type: application/json
+
+
+
+
+
+
+### patients api calls
+### Create patient Item
+POST http://localhost:8081/api/v1/patients HTTP/1.1
 Content-Type: application/json
 
 {
@@ -20,51 +108,23 @@ Content-Type: application/json
     "Gender": "man"
 }
 
-### Create Doctor Item
-POST localhost:8081/api/v1/doctors
+### Get patient Item
+GET http://localhost:8081/api/v1/patients/2 HTTP/1.1
+
+
+### Update patient Item
+PUT http://localhost:8081/api/v1/patients/8 HTTP/1.1
 Content-Type: application/json
 
 {
-    "Name": "MAX",
-    "Specialty": "Sergeon"
+    "id": "1",
+    "Name": "John",
+    "Birthdate": "2004/03/25",
+    "Gender": "Man",
+    "createdAt": "2024-02-29T23:17:22+06:00",
+    "updatedAt": "2024-02-29T23:17:22+06:00",
 }
 
-
-> {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-%}
-
-### Get Appointment Item
-GET localhost:8081/api/v1/appointments/1
-
-> {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-%}
-
-### Update Appointment Item
-PUT localhost:8081/api/v1/appointments/1
+### Delete patient Item
+DELETE http://localhost:8081/api/v1/patients/4 HTTP/1.1
 Content-Type: application/json
-
-{
-  "Status": "NOT Ok"
-}
-
-> {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-%}
-
-### Delete Appointment Item
-DELETE localhost:8081/api/v1/appointments/1
-Content-Type: application/json
-
-> {%
-    client.test("Request executed successfully", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-%}
