@@ -1,154 +1,125 @@
 package main
 
-// import (
-// 	"encoding/json"
-// 	"net/http"
-// 	"strconv"
+import (
+	"net/http"
+	"strconv"
 
-// 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
+	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
 
-// 	"github.com/gorilla/mux"
-// )
+	"github.com/gorilla/mux"
+)
 
-// func (app *application) respondWithError(w http.ResponseWriter, code int, message string) {
-// 	app.respondWithJSON(w, code, map[string]string{"error": message})
-// }
+func (app *application) createPatientHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Name      string `json:"name"`
+		Birthdate string `json:"birthdate"`
+		Gender    string `json:"gender"`
+	}
 
-// func (app *application) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-// 	response, err := json.Marshal(payload)
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
 
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-// 		return
-// 	}
+	patient := &model.Patient{
+		Name:      input.Name,
+		Birthdate: input.Birthdate,
+		Gender:    input.Gender,
+	}
 
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(code)
-// 	w.Write(response)
-// }
-// func (app *application) createPatientHandler(w http.ResponseWriter, r *http.Request) {
-// 	var input struct {
-// 		Name      string `json:"name"`
-// 		Birthdate string `json:"birthdate"`
-// 		Gender    string `json:"gender"`
-// 	}
+	err = app.models.Patients.Insert(patient)
+	if err != nil {
+		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		return
+	}
 
-// 	err := app.readJSON(w, r, &input)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-// 		return
-// 	}
+	app.respondWithJSON(w, http.StatusCreated, patient)
+}
 
-// 	patient := &model.Patient{
-// 		Name:      input.Name,
-// 		Birthdate: input.Birthdate,
-// 		Gender:    input.Gender,
-// 	}
+func (app *application) getPatientHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	param := vars["patientId"]
 
-// 	err = app.models.Patients.Insert(patient)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-// 		return
-// 	}
+	id, err := strconv.Atoi(param)
+	if err != nil || id < 1 {
+		app.respondWithError(w, http.StatusBadRequest, "Invalid patient ID")
+		return
+	}
 
-// 	app.respondWithJSON(w, http.StatusCreated, patient)
-// }
+	patient, err := app.models.Patients.Get(id)
+	if err != nil {
+		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		return
+	}
 
-// func (app *application) getPatientHandler(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	param := vars["id"]
+	app.respondWithJSON(w, http.StatusOK, patient)
+}
 
-// 	id, err := strconv.Atoi(param)
-// 	if err != nil || id < 1 {
-// 		app.respondWithError(w, http.StatusBadRequest, "Invalid patient ID")
-// 		return
-// 	}
+func (app *application) updatePatientHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	param := vars["patientId"]
 
-// 	patient, err := app.models.Patients.Get(id)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-// 		return
-// 	}
+	id, err := strconv.Atoi(param)
+	if err != nil || id < 1 {
+		app.respondWithError(w, http.StatusBadRequest, "Invalid patient ID")
+		return
+	}
 
-// 	app.respondWithJSON(w, http.StatusOK, patient)
-// }
+	patient, err := app.models.Patients.Get(id)
+	if err != nil {
+		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		return
+	}
 
-// func (app *application) updatePatientHandler(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	param := vars["id"]
+	var input struct {
+		Name      *string `json:"name"`
+		Birthdate *string `json:"birthdate"`
+		Gender    *string `json:"gender"`
+	}
 
-// 	id, err := strconv.Atoi(param)
-// 	if err != nil || id < 1 {
-// 		app.respondWithError(w, http.StatusBadRequest, "Invalid patient ID")
-// 		return
-// 	}
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
 
-// 	patient, err := app.models.Patients.Get(id)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
-// 		return
-// 	}
+	if input.Name != nil {
+		patient.Name = *input.Name
+	}
 
-// 	var input struct {
-// 		Name      *string `json:"name"`
-// 		Birthdate *string `json:"birthdate"`
-// 		Gender    *string `json:"gender"`
-// 	}
+	if input.Birthdate != nil {
+		patient.Birthdate = *input.Birthdate
+	}
 
-// 	err = app.readJSON(w, r, &input)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-// 		return
-// 	}
+	if input.Gender != nil {
+		patient.Gender = *input.Gender
+	}
 
-// 	if input.Name != nil {
-// 		patient.Name = *input.Name
-// 	}
+	err = app.models.Patients.Update(patient)
+	if err != nil {
+		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		return
+	}
 
-// 	if input.Birthdate != nil {
-// 		patient.Birthdate = *input.Birthdate
-// 	}
+	app.respondWithJSON(w, http.StatusOK, patient)
+}
 
-// 	if input.Gender != nil {
-// 		patient.Gender = *input.Gender
-// 	}
+func (app *application) deletePatientHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	param := vars["patientId"]
 
-// 	err = app.models.Patients.Update(patient)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-// 		return
-// 	}
+	id, err := strconv.Atoi(param)
+	if err != nil || id < 1 {
+		app.respondWithError(w, http.StatusBadRequest, "Invalid patient ID")
+		return
+	}
 
-// 	app.respondWithJSON(w, http.StatusOK, patient)
-// }
+	err = app.models.Patients.Delete(id)
+	if err != nil {
+		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		return
+	}
 
-// func (app *application) deletePatientHandler(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	param := vars["id"]
-
-// 	id, err := strconv.Atoi(param)
-// 	if err != nil || id < 1 {
-// 		app.respondWithError(w, http.StatusBadRequest, "Invalid patient ID")
-// 		return
-// 	}
-
-// 	err = app.models.Patients.Delete(id)
-// 	if err != nil {
-// 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-// 		return
-// 	}
-
-// 	app.respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
-// }
-
-// func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
-// 	dec := json.NewDecoder(r.Body)
-// 	dec.DisallowUnknownFields()
-
-// 	err := dec.Decode(dst)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
+	app.respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+}
