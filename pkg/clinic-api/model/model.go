@@ -7,8 +7,8 @@ import (
 )
 
 type Models struct {
-	Doctors DoctorModel
-	Patients PatientModel
+	Doctors      DoctorModel
+	Appointments AppointmentModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -22,7 +22,7 @@ func NewModels(db *sql.DB) Models {
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,
 		},
-		Patients: PatientModel{
+		Appointments: AppointmentModel{
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,
