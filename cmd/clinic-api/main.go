@@ -53,31 +53,32 @@ func (app *application) run() {
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
-	// Menu Singleton
-	// Create a new menu
+	// CLinic Singleton
+	// Create a new appointment
 	v1.HandleFunc("/appointments", app.createAppointmentHandler).Methods("POST")
-	// Get a specific menu
+	// Get a specific appointment
 	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.getAppointmentHandler).Methods("GET")
-	// Update a specific menu
+	// Update a specific appointment
 	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.updateAppointmentHandler).Methods("PUT")
-	// Delete a specific menu
+	// Delete a specific appointment
 	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.deleteAppointmentHandler).Methods("DELETE")
 
-	
+	// Create a new doctor
 	v1.HandleFunc("/doctors", app.createDoctorHandler).Methods("POST")
-	// Get a specific menu
+	// Get a specific doctor
 	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.getDoctorHandler).Methods("GET")
-	// Update a specific menu
+	// Update a specific doctor
 	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
-	// Delete a specific menu
+	// Delete a specific doctor
 	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
 
+	// Create a new patient
 	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
-	// Get a specific menu
+	// Get a specific patient
 	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.getPatientHandler).Methods("GET")
-	// Update a specific menu
+	// Update a specific patient
 	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.updatePatientHandler).Methods("PUT")
-	// Delete a specific menu
+	// Delete a specific patient
 	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
 
 	log.Printf("Starting server on %s\n", app.config.port)
@@ -86,18 +87,18 @@ func (app *application) run() {
 }
 
 func openDB(cfg config) (*sql.DB, error) {
-    // Use sql.Open() to create an empty connection pool, using the DSN from the config struct.
-    db, err := sql.Open("postgres", cfg.db.dsn)
-    if err != nil {
-        return nil, err
-    }
+	// Use sql.Open() to create an empty connection pool, using the DSN from the config struct.
+	db, err := sql.Open("postgres", cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
 
-    // Check if the connection is working by executing a test query
-    err = db.Ping()
-    if err != nil {
-        db.Close()
-        return nil, err
-    }
+	// Check if the connection is working by executing a test query
+	err = db.Ping()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
 
-    return db, nil
+	return db, nil
 }

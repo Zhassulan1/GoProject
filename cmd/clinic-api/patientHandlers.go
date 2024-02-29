@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -57,6 +58,8 @@ func (app *application) getPatientHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) updatePatientHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print("Patient Update Started")
+
 	vars := mux.Vars(r)
 	param := vars["patientId"]
 
@@ -68,6 +71,7 @@ func (app *application) updatePatientHandler(w http.ResponseWriter, r *http.Requ
 
 	patient, err := app.models.Patients.Get(id)
 	if err != nil {
+		log.Print("Could Not Upadate Patient")
 		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
 		return
 	}
