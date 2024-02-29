@@ -10,6 +10,25 @@ Content-Type: application/json
     "EndTime": "03:03:04",
     "Status": "Ok"
 }
+### Create Patient Item
+POST localhost:8081/api/v1/patients
+Content-Type: application/json
+
+{
+    "Name": "John",
+    "Birthdate": "2004/03/25",
+    "Gender": "man"
+}
+
+### Create Doctor Item
+POST localhost:8081/api/v1/doctors
+Content-Type: application/json
+
+{
+    "Name": "MAX",
+    "Specialty": "Sergeon"
+}
+
 
 > {%
     client.test("Request executed successfully", function() {

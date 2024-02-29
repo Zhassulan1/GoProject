@@ -72,6 +72,14 @@ func (app *application) run() {
 	// Delete a specific menu
 	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
 
+	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
+	// Get a specific menu
+	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.getPatientHandler).Methods("GET")
+	// Update a specific menu
+	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.updatePatientHandler).Methods("PUT")
+	// Delete a specific menu
+	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
+
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
 	log.Fatal(err)
