@@ -2,6 +2,7 @@
 
 
 ## Medical Clinic REST API
+```
 POST /patients: Создать нового пациента.
 GET /patients/:id: Получить информацию о пациенте по его ID.
 PUT /patients/:id: Обновить информацию о пациенте по его ID.
@@ -16,8 +17,10 @@ POST /appointments: Создать новую запись на прием.
 GET /appointments/:id: Получить информацию о записи на прием по ее ID.
 PUT /appointments/:id: Обновить информацию о записи на прием по ее ID.
 DELETE /appointments/:id: Удалить запись на прием по ее ID.
+```
 
 ## DB Structure
+```
 Table patients {
   id bigserial [primary key]
   created_at timestamp
@@ -44,6 +47,7 @@ Table appointments {
   doctor_id bigint [ref: > doctors.id]
   date_time DATETIME
 }
+```
 
 ## Описание проекта:
 Clinic API - это веб-приложение на языке Golang, предназначенное для управления данными клиники. Оно предоставляет набор эндпоинтов для выполнения различных операций с данными о врачах, записях на прием и пациентах.
@@ -70,4 +74,4 @@ Clinic API - это веб-приложение на языке Golang, пред
   -  Язык программирования Golang:  
   -  Gorilla Mux;  
   -  Библиотека для работы с базой данных PostgreSQL: database/sql;  
-  -  Драйвер для работы с базой данных PostgreSQL: github.com/lib/pq;
+  -  Драйвер для работы с базой данных PostgreSQL: github.com/lib/pq;  
