@@ -75,3 +75,11 @@ Clinic API - это веб-приложение на языке Golang, пред
   -  Gorilla Mux;  
   -  Библиотека для работы с базой данных PostgreSQL: database/sql;  
   -  Драйвер для работы с базой данных PostgreSQL: github.com/lib/pq;  
+
+
+### Team members
+```
+id: 22B030547, name: Zhassulan Kainazarov
+id: 22B030548, name: Damir Kakarov
+id: 22B030373, name: Yerlan Kaliyev
+```
