@@ -49,7 +49,7 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 		EndTime   string `json:"endTime"`
 		Status    string `json:"status"`
 	}
-	log.Print("Creating appointment Item")
+
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
@@ -64,11 +64,9 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 		EndTime:   input.EndTime,
 		Status:    input.Status,
 	}
-	log.Print("Inserting Into DB")
+
 	err = app.models.Appointments.Insert(appointment)
 	if err != nil {
-		log.Print("Received Error During Insertion:")
-		log.Printf(err.Error())
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
@@ -149,8 +147,6 @@ func (app *application) updateAppointmentHandler(w http.ResponseWriter, r *http.
 
 	err = app.models.Appointments.Update(appointment)
 	if err != nil {
-		log.Print("Could Not Update")
-		log.Print(err.Error())
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
