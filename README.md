@@ -29,14 +29,16 @@ Clinic API - это веб-приложение на языке Golang, пред
 
 
 ### Team members:
+
 ```
-id: 22B030547, name: Zhassulan Kainazarov
-id: 22B030548, name: Damir Kakarov
-id: 22B030373, name: Yerlan Kaliyev
+Zhassulan Kainazarov, 22B030547
+Damir Kakarov, 22B030548
+Yerlan Kaliyev, 22B030373
 ```
 
 
 ## API endpoints:
+
 ```
 POST /patients: Создать нового пациента.
 GET /patients/:id: Получить информацию о пациенте по его ID.
@@ -55,6 +57,7 @@ DELETE /appointments/:id: Удалить запись на прием по ее 
 ```
 
 ## DB Structure:
+
 ```
 Table patients {
   id bigserial [primary key]
