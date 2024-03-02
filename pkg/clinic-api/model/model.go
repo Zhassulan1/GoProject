@@ -9,7 +9,7 @@ import (
 type Models struct {
 	Doctors      DoctorModel
 	Appointments AppointmentModel
-	Patients PatientModel
+	Patients 	 PatientModel
 }
 
 func NewModels(db *sql.DB) Models {

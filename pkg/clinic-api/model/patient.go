@@ -8,12 +8,12 @@ import (
 )
 
 type Patient struct {
-	Id        string `json:"id"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
-	Name      string `json:"name"`
-	Birthdate string `json:"birthdate"`
-	Gender    string `json:"gender"`
+	Id         string `json:"id"`
+	CreatedAt  string `json:"createdAt"`
+	UpdatedAt  string `json:"updatedAt"`
+	Name       string `json:"name"`
+	Birthdate  string `json:"birthdate"`
+	Gender     string `json:"gender"`
 }
 
 type PatientModel struct {
@@ -36,7 +36,6 @@ func (m PatientModel) Insert(patient *Patient) error {
 }
 
 func (m PatientModel) Get(id int) (*Patient, error) {
-
 	query := `
 		SELECT id, created_at, updated_at, name, birthdate, gender
 		FROM patients
@@ -47,12 +46,8 @@ func (m PatientModel) Get(id int) (*Patient, error) {
 	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, query, id)
-
-	log.Print(row.Err(), "\n", row.Scan(), "\n", row)
-
 	err := row.Scan(&patient.Id, &patient.CreatedAt, &patient.UpdatedAt, &patient.Name, &patient.Birthdate, &patient.Gender)
 	if err != nil {
-		log.Print(err.Error())
 		return nil, err
 	}
 	return &patient, nil

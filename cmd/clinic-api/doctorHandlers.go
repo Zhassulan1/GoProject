@@ -11,13 +11,12 @@ import (
 
 func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name      string `json:"name"`
-		Specialty string `json:"specialty"`
+		Name       string `json:"name"`
+		Specialty  string `json:"specialty"`
 	}
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {
-		// log.Printf(err.Error())
 		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
