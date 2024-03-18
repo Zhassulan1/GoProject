@@ -67,6 +67,7 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 
 	err = app.models.Appointments.Insert(appointment)
 	if err != nil {
+		log.Print(err.Error())
 		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}

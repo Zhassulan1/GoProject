@@ -1,33 +1,36 @@
-CREATE TABLE IF NOT EXISTS patients 
+CREATE TABLE IF NOT EXISTS base_data
 (
-  id            bigserial PRIMARY KEY,
-  created_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
-  updated_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
-  name          text                        NOT NULL,
-  birthdate     date                        NOT NULL,
-  gender        text                        NOT NULL
+    created_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now()
 );
+
+
+CREATE TABLE IF NOT EXISTS patients
+(
+    id        BIGSERIAL PRIMARY KEY,
+    name      TEXT NOT NULL,
+    birthdate DATE NOT NULL,
+    gender    TEXT NOT NULL
+) INHERITS (base_data);
+
 
 CREATE TABLE IF NOT EXISTS doctors
 (
-    id            bigserial PRIMARY KEY,
-    created_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
-    updated_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
-    name          text                        NOT NULL,
-    specialty     text                        NOT NULL
-);
+    id        BIGSERIAL PRIMARY KEY,
+    name      TEXT NOT NULL,
+    specialty TEXT NOT NULL
+) INHERITS (base_data);
+
 
 CREATE TABLE IF NOT EXISTS appointments
 (
-    id            bigserial PRIMARY KEY,
-    created_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
-    updated_at    timestamp(0) with time zone NOT NULL DEFAULT now(),
-    patient_id    bigint                      NOT NULL,
-    doctor_id     bigint                      NOT NULL,
-    date          date                        NOT NULL,
-    start_time    time                        NOT NULL,
-    end_time      time                        NOT NULL,
-    status        text                        NOT NULL,
+    id         BIGSERIAL PRIMARY KEY,
+    patient_id BIGINT NOT NULL,
+    doctor_id  BIGINT NOT NULL,
+    date       DATE   NOT NULL,
+    start_time TIME   NOT NULL,
+    end_time   TIME   NOT NULL,
+    status     TEXT   NOT NULL,
     FOREIGN KEY (patient_id) REFERENCES patients (id),
     FOREIGN KEY (doctor_id) REFERENCES doctors (id)
-);
+) INHERITS (base_data);
