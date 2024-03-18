@@ -6,10 +6,16 @@ import (
 	"os"
 )
 
+type AppointmentModel struct {
+	DB       *sql.DB
+	InfoLog  *log.Logger
+	ErrorLog *log.Logger
+}
+
 type Models struct {
 	Doctors      DoctorModel
 	Appointments AppointmentModel
-	Patients 	 PatientModel
+	Patients     PatientModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -29,8 +35,8 @@ func NewModels(db *sql.DB) Models {
 			ErrorLog: errorLog,
 		},
 		Patients: PatientModel{
-			DB: db,
-			InfoLog: infoLog,
+			DB:       db,
+			InfoLog:  infoLog,
 			ErrorLog: errorLog,
 		},
 	}

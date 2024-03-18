@@ -7,15 +7,6 @@ import (
 	"time"
 )
 
-type Patient struct {
-	Id         string `json:"id"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
-	Name       string `json:"name"`
-	Birthdate  string `json:"birthdate"`
-	Gender     string `json:"gender"`
-}
-
 type PatientModel struct {
 	DB       *sql.DB
 	InfoLog  *log.Logger
