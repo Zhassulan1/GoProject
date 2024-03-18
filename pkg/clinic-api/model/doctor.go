@@ -23,7 +23,11 @@ func (m DoctorModel) Insert(doctor *Doctor) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&doctor.Id, &doctor.CreatedAt, &doctor.UpdatedAt)
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&doctor.Id,
+		&doctor.CreatedAt,
+		&doctor.UpdatedAt,
+	)
 }
 
 func (m DoctorModel) Get(id int) (*Doctor, error) {
@@ -37,7 +41,14 @@ func (m DoctorModel) Get(id int) (*Doctor, error) {
 	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, query, id)
-	err := row.Scan(&doctor.Id, &doctor.CreatedAt, &doctor.UpdatedAt, &doctor.Name, &doctor.Specialty)
+	err := row.Scan(
+		&doctor.Id,
+		&doctor.CreatedAt,
+		&doctor.UpdatedAt,
+		&doctor.Name,
+		&doctor.Specialty,
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +62,12 @@ func (m DoctorModel) Update(doctor *Doctor) error {
 		WHERE id = $3
 		RETURNING updated_at
 		`
-	args := []interface{}{doctor.Name, doctor.Specialty, doctor.Id}
+	args := []interface{}{
+		doctor.Name,
+		doctor.Specialty,
+		doctor.Id,
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

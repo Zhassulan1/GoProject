@@ -17,7 +17,8 @@ func (m AppointmentModel) Insert(appointment *Appointment) error {
 		appointment.Date,
 		appointment.StartTime,
 		appointment.EndTime,
-		appointment.Status}
+		appointment.Status,
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -25,15 +26,24 @@ func (m AppointmentModel) Insert(appointment *Appointment) error {
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(
 		&appointment.Id,
 		&appointment.CreatedAt,
-		&appointment.UpdatedAt)
+		&appointment.UpdatedAt,
+	)
 }
 
 func (m AppointmentModel) Get(id int) (*Appointment, error) {
 	query := `
-		SELECT id, created_at, updated_at, patient_id, doctor_id, date, start_time, end_time, status
+		SELECT id,
+			created_at,
+			updated_at,
+			patient_id,
+			doctor_id,
+			date,
+			start_time,
+			end_time,
+			status
 		FROM appointments
 		WHERE id = $1
-		`
+	`
 	var appointment Appointment
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -48,7 +58,8 @@ func (m AppointmentModel) Get(id int) (*Appointment, error) {
 		&appointment.Date,
 		&appointment.StartTime,
 		&appointment.EndTime,
-		&appointment.Status)
+		&appointment.Status,
+	)
 
 	if err != nil {
 		return nil, err
@@ -59,7 +70,12 @@ func (m AppointmentModel) Get(id int) (*Appointment, error) {
 func (m AppointmentModel) Update(appointment *Appointment) error {
 	query := `
 		UPDATE appointments
-		SET patient_id = $1, doctor_id = $2, date = $3, start_time = $4, end_time = $5, status = $6
+		SET patient_id = $1,
+			doctor_id  = $2,
+			date       = $3,
+			start_time = $4,
+			end_time   = $5,
+			status     = $6
 		WHERE id = $7
 		RETURNING updated_at
 		`
@@ -70,7 +86,8 @@ func (m AppointmentModel) Update(appointment *Appointment) error {
 		appointment.StartTime,
 		appointment.EndTime,
 		appointment.Status,
-		appointment.Id}
+		appointment.Id,
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

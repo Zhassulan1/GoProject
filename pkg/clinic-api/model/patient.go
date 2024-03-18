@@ -19,11 +19,21 @@ func (m PatientModel) Insert(patient *Patient) error {
 		VALUES ($1, $2, $3) 
 		RETURNING id, created_at, updated_at
 		`
-	args := []interface{}{patient.Name, patient.Birthdate, patient.Gender}
+
+	args := []interface{}{
+		patient.Name,
+		patient.Birthdate,
+		patient.Gender,
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&patient.Id, &patient.CreatedAt, &patient.UpdatedAt)
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&patient.Id,
+		&patient.CreatedAt,
+		&patient.UpdatedAt,
+	)
 }
 
 func (m PatientModel) Get(id int) (*Patient, error) {
@@ -37,7 +47,15 @@ func (m PatientModel) Get(id int) (*Patient, error) {
 	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, query, id)
-	err := row.Scan(&patient.Id, &patient.CreatedAt, &patient.UpdatedAt, &patient.Name, &patient.Birthdate, &patient.Gender)
+	err := row.Scan(
+		&patient.Id,
+		&patient.CreatedAt,
+		&patient.UpdatedAt,
+		&patient.Name,
+		&patient.Birthdate,
+		&patient.Gender,
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +69,13 @@ func (m PatientModel) Update(patient *Patient) error {
 		WHERE id = $4
 		RETURNING updated_at
 		`
-	args := []interface{}{patient.Name, patient.Birthdate, patient.Gender, patient.Id}
+	args := []interface{}{
+		patient.Name,
+		patient.Birthdate,
+		patient.Gender,
+		patient.Id,
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
