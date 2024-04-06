@@ -41,7 +41,7 @@ func (m DoctorModel) GetAll(name, specialty string, filters Filters) ([]*Doctor,
 	// Retrieve all menu items from the database.
 	query := fmt.Sprintf(
 		`
-		SELECT count(*) OVER(), id, created_at, updated_at
+		SELECT count(*) OVER(), id, created_at, updated_at, name, specialty
 		FROM doctors
 		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
 		AND (LOWER(specialty) = LOWER($2) OR $2 = '')
