@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 )
@@ -29,6 +30,83 @@ func (m DoctorModel) Insert(doctor *Doctor) error {
 		&doctor.UpdatedAt,
 	)
 }
+
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
+
+func (m DoctorModel) GetAll(name, specialty string, filters Filters) ([]*Doctor, Metadata, error) {
+
+	// Retrieve all menu items from the database.
+	query := fmt.Sprintf(
+		`
+		SELECT count(*) OVER(), id, created_at, updated_at
+		FROM doctors
+		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
+		AND (LOWER(specialty) = LOWER($2) OR $2 = '')
+		-- AND (nutrition_value >= $2 OR $2 = 0)
+		-- AND (nutrition_value <= $3 OR $3 = 0)
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4		`,
+		filters.sortColumn(), filters.sortDirection())
+
+	// Create a context with a 3-second timeout.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// Organize our four placeholder parameter values in a slice.
+	args := []interface{}{name, specialty, filters.limit(), filters.offset()}
+
+	// log.Println(query, title, from, to, filters.limit(), filters.offset())
+	// Use QueryContext to execute the query. This returns a sql.Rows result set containing
+	// the result.
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	// Importantly, defer a call to rows.Close() to ensure that the result set is closed
+	// before GetAll returns.
+	defer func() {
+		if err := rows.Close(); err != nil {
+			m.ErrorLog.Println(err)
+		}
+	}()
+
+	// Declare a totalRecords variable
+	totalRecords := 0
+
+	var doctors []*Doctor
+	for rows.Next() {
+		var doctor Doctor
+		err := rows.Scan(&totalRecords, &doctor.Id, &doctor.CreatedAt, &doctor.UpdatedAt, &doctor.Name, &doctor.Specialty)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		// Add the Movie struct to the slice
+		doctors = append(doctors, &doctor)
+	}
+
+	// When the rows.Next() loop has finished, call rows.Err() to retrieve any error
+	// that was encountered during the iteration.
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	// Generate a Metadata struct, passing in the total record count and pagination parameters
+	// from the client.
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	// If everything went OK, then return the slice of the movies and metadata.
+	return doctors, metadata, nil
+}
+
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
 
 func (m DoctorModel) Get(id int) (*Doctor, error) {
 	query := `

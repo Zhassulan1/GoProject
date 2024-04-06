@@ -4,7 +4,7 @@ POST http://localhost:8081/api/v1/doctors HTTP/1.1
 Content-Type: application/json
 
 {
-    "Name": "MAX3",
+    "Name": "MAX5",
     "Specialty": "Sergeon2"
 }
 

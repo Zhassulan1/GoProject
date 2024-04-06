@@ -1,18 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
+	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/validator"
 
 	"github.com/gorilla/mux"
 )
 
 func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name       string `json:"name"`
-		Specialty  string `json:"specialty"`
+		Name      string `json:"name"`
+		Specialty string `json:"specialty"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -34,6 +36,56 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	app.respondWithJSON(w, http.StatusCreated, doctor)
 }
+
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
+
+func (app *application) SearchDoctorHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Name      string `json:"name"`
+		Specialty string `json:"specialty"`
+		model.Filters
+	}
+
+	v := validator.New()
+	qs := r.URL.Query()
+
+	input.Name = app.readStrings(qs, "name", "")
+	input.Specialty = app.readStrings(qs, "specialty", "")
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	input.Filters.Sort = app.readStrings(qs, "sort", "id")
+
+	input.Filters.SortSafeList = []string{
+		// ascending sort values
+		"id", "name", "specialty",
+		// descending sort values
+		"-id", "-name", "-specialty",
+	}
+
+	if model.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+	doctors, metadata, err := app.models.Doctors.GetAll(input.Name, input.Specialty, input.Filters)
+	if err != nil {
+		fmt.Println("We are in search doctor handler", "\nname: ", input.Name, "\nspec:", input.Specialty, "\n", input.Filters)
+		fmt.Print("\nError: ", err)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, envelope{"doctors": doctors, "metadata": metadata}, nil)
+}
+
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
+// ???????????????????????
 
 func (app *application) getDoctorHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
