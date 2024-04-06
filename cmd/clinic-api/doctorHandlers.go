@@ -62,9 +62,9 @@ func (app *application) SearchDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	input.Filters.SortSafeList = []string{
 		// ascending sort values
-		"id", "name", "specialty",
+		"id", "name", "specialty", "created_at", "updated_at",
 		// descending sort values
-		"-id", "-name", "-specialty",
+		"-id", "-name", "-specialty", "-created_at", "-updated_at",
 	}
 
 	if model.ValidateFilters(v, input.Filters); !v.Valid() {
