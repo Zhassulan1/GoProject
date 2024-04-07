@@ -17,6 +17,17 @@ type Doctor struct {
 	Specialty string `json:"specialty"`
 }
 
+type DoctorPagination struct {
+	Limit        int    `json:"limit"`
+	Offset       int    `json:"offset"`
+	Name         string `json:"name"`
+	Specialty    string `json:"specialty"`
+	CreatedBegin string `json:"startTime"`
+	CreatedEnd   string `json:"endTime"`
+	OrderBy      string `json:"orederBy"`
+	Order        uint8  `json:"order"`
+}
+
 type Appointment struct {
 	Id        string `json:"id"`
 	CreatedAt string `json:"createdAt"`

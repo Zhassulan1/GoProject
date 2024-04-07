@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
 	"github.com/gorilla/mux"
@@ -23,6 +24,7 @@ type config struct {
 type application struct {
 	config config
 	models model.Models
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -65,6 +67,8 @@ func (app *application) run() {
 
 	// Create a new doctor
 	v1.HandleFunc("/doctors", app.createDoctorHandler).Methods("POST")
+	// Get a doctors list by pagination and filters
+	v1.HandleFunc("/doctors", app.SearchDoctorHandler).Methods("GET")
 	// Get a specific doctor
 	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.getDoctorHandler).Methods("GET")
 	// Update a specific doctor
