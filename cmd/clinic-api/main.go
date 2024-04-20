@@ -3,12 +3,11 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"log"
-	"net/http"
+	"os"
 	"sync"
 
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
-	"github.com/gorilla/mux"
+	"github.com/Zhassulan1/Go_Project/pkg/jsonlog"
 
 	_ "github.com/lib/pq"
 )
@@ -25,6 +24,7 @@ type application struct {
 	config config
 	models model.Models
 	wg     sync.WaitGroup
+	logger *jsonlog.Logger
 }
 
 func main() {
@@ -34,60 +34,32 @@ func main() {
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:1234@localhost/medicalclinic?sslmode=disable", "PostgreSQL DSN")
 	flag.Parse()
 
-	// Connect to DB
+	// Init logger
+	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
+
 	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.PrintError(err, nil)
 		return
 	}
-	defer db.Close()
+	// Defer a call to db.Close() so that the connection pool is closed before the main()
+	// function exits.
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.PrintFatal(err, nil)
+		}
+	}()
 
 	app := &application{
 		config: cfg,
 		models: model.NewModels(db),
+		logger: logger,
 	}
 
-	app.run()
-}
-
-func (app *application) run() {
-	r := mux.NewRouter()
-
-	v1 := r.PathPrefix("/api/v1").Subrouter()
-
-	// CLinic Singleton
-	// Create a new appointment
-	v1.HandleFunc("/appointments", app.createAppointmentHandler).Methods("POST")
-	// Get a specific appointment
-	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.getAppointmentHandler).Methods("GET")
-	// Update a specific appointment
-	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.updateAppointmentHandler).Methods("PUT")
-	// Delete a specific appointment
-	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.deleteAppointmentHandler).Methods("DELETE")
-
-	// Create a new doctor
-	v1.HandleFunc("/doctors", app.createDoctorHandler).Methods("POST")
-	// Get a doctors list by pagination and filters
-	v1.HandleFunc("/doctors", app.SearchDoctorHandler).Methods("GET")
-	// Get a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.getDoctorHandler).Methods("GET")
-	// Update a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
-	// Delete a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
-
-	// Create a new patient
-	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
-	// Get a specific patient
-	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.getPatientHandler).Methods("GET")
-	// Update a specific patient
-	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.updatePatientHandler).Methods("PUT")
-	// Delete a specific patient
-	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
-
-	log.Printf("Starting server on %s\n", app.config.port)
-	err := http.ListenAndServe(app.config.port, r)
-	log.Fatal(err)
+	// Call app.server() to start the server.
+	if err := app.serve(); err != nil {
+		logger.PrintFatal(err, nil)
+	}
 }
 
 func openDB(cfg config) (*sql.DB, error) {

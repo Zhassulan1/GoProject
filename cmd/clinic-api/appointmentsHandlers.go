@@ -14,17 +14,18 @@ func (app *application) respondWithError(w http.ResponseWriter, code int, messag
 	app.respondWithJSON(w, code, map[string]string{"error": message})
 }
 
-func (app *application) readJSON(_ http.ResponseWriter, r *http.Request, dst interface{}) error {
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
+// ? commented since there is new readJSON in helpers.go
+// func (app *application) readJSON(_ http.ResponseWriter, r *http.Request, dst interface{}) error {
+// 	dec := json.NewDecoder(r.Body)
+// 	dec.DisallowUnknownFields()
 
-	err := dec.Decode(dst)
-	if err != nil {
-		return err
-	}
+// 	err := dec.Decode(dst)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (app *application) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
