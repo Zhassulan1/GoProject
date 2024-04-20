@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ### Get doctors Item
-GET http://localhost:8081/api/v1/doctors/3 HTTP/1.1
+GET http://localhost:8081/api/v1/doctors/1 HTTP/1.1
 
 ### Update doctors Item
 PUT http://localhost:8081/api/v1/doctors/1 HTTP/1.1

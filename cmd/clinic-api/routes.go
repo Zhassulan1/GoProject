@@ -10,6 +10,14 @@ import (
 func (app *application) routes() http.Handler {
 	r := mux.NewRouter()
 
+	// Convert the app.notFoundResponse helper to a http.Handler using the http.HandlerFunc()
+	// adapter, and then set it as the custom error handler for 404 Not Found responses.
+	r.NotFoundHandler = http.HandlerFunc(app.notFoundResponse)
+
+	// Convert app.methodNotAllowedResponse helper to a http.Handler and set it as the custom
+	// error handler for 405 Method Not Allowed responses
+	r.MethodNotAllowedHandler = http.HandlerFunc(app.methodNotAllowedResponse)
+
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
 	// CLinic Singleton
@@ -31,7 +39,7 @@ func (app *application) routes() http.Handler {
 	// Update a specific doctor
 	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
 	// Delete a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
+	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.requirePermissions("menus:write", app.deleteDoctorHandler)).Methods("DELETE")
 
 	// Create a new patient
 	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
