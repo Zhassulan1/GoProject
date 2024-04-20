@@ -42,6 +42,12 @@ func (app *application) routes() http.Handler {
 	// Delete a specific patient
 	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
 
+	users1 := r.PathPrefix("/api/v1").Subrouter()
+	// User handlers with Authentication
+	users1.HandleFunc("/users", app.registerUserHandler).Methods("POST")
+	users1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
+	users1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
+
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
 	log.Fatal(err)
