@@ -38,7 +38,7 @@ func (m DoctorModel) Insert(doctor *Doctor) error {
 
 func (m DoctorModel) GetAll(name, specialty string, filters Filters) ([]*Doctor, Metadata, error) {
 
-	// Retrieve all menu items from the database.
+	// Retrieve all doctors from the database.
 	query := fmt.Sprintf(
 		`
 		SELECT count(*) OVER(), id, created_at, updated_at, name, specialty
