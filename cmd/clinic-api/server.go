@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +14,7 @@ import (
 func (app *application) serve() error {
 	// Declare an HTTP server using the same settings as in our main() function.
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", app.config.port),
+		// Addr:         fmt.Sprintf("%s", app.config.port),
 		Handler:      app.routes(),
 		ErrorLog:     log.New(app.logger, "", 0),
 		IdleTimeout:  time.Minute,

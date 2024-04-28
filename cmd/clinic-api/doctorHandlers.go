@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -19,7 +20,7 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
@@ -30,11 +31,11 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	err = app.models.Doctors.Insert(doctor)
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusCreated, doctor)
+	app.writeJSON(w, http.StatusCreated, envelope{"doctor": doctor}, nil)
 }
 
 // ???????????????????????
@@ -93,17 +94,17 @@ func (app *application) getDoctorHandler(w http.ResponseWriter, r *http.Request)
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid doctor ID")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid doctor ID")
 		return
 	}
 
 	doctor, err := app.models.Doctors.Get(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.errorResponse(w, r, http.StatusNotFound, "404 Not Found")
 		return
 	}
-
-	app.respondWithJSON(w, http.StatusOK, doctor)
+	app.writeJSON(w, http.StatusOK, envelope{"doctor": doctor}, nil)
+	// app.respondWithJSON(w, http.StatusOK, doctor)
 }
 
 func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Request) {
@@ -112,13 +113,13 @@ func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid doctor ID")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid doctor ID")
 		return
 	}
 
 	doctor, err := app.models.Doctors.Get(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.errorResponse(w, r, http.StatusNotFound, "404 Not Found")
 		return
 	}
 
@@ -129,7 +130,7 @@ func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
@@ -143,27 +144,31 @@ func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	err = app.models.Doctors.Update(doctor)
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.errorResponse(w, r, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusOK, doctor)
+	app.writeJSON(w, http.StatusOK, envelope{"doctor": doctor}, nil)
 }
 
 func (app *application) deleteDoctorHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	param := vars["doctorId"]
-
-	id, err := strconv.Atoi(param)
-	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid doctor ID")
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		fmt.Print("Error: ", err, ": ", id)
 		return
 	}
 
 	err = app.models.Doctors.Delete(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		switch {
+		case errors.Is(err, model.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
-	app.respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+
+	app.writeJSON(w, http.StatusOK, envelope{"message": "success"}, nil)
 }

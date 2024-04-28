@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -24,31 +25,32 @@ func (app *application) routes() http.Handler {
 	// Create a new appointment
 	v1.HandleFunc("/appointments", app.createAppointmentHandler).Methods("POST")
 	// Get a specific appointment
-	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.getAppointmentHandler).Methods("GET")
+	v1.HandleFunc("/appointments/{id:[0-9]+}", app.getAppointmentHandler).Methods("GET")
 	// Update a specific appointment
-	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.updateAppointmentHandler).Methods("PUT")
+	v1.HandleFunc("/appointments/{id:[0-9]+}", app.updateAppointmentHandler).Methods("PUT")
 	// Delete a specific appointment
-	v1.HandleFunc("/appointments/{appointmentId:[0-9]+}", app.deleteAppointmentHandler).Methods("DELETE")
+	v1.HandleFunc("/appointments/{id:[0-9]+}", app.deleteAppointmentHandler).Methods("DELETE")
 
 	// Create a new doctor
 	v1.HandleFunc("/doctors", app.createDoctorHandler).Methods("POST")
 	// Get a doctors list by pagination and filters
 	v1.HandleFunc("/doctors", app.SearchDoctorHandler).Methods("GET")
 	// Get a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.getDoctorHandler).Methods("GET")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.getDoctorHandler).Methods("GET")
 	// Update a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
 	// Delete a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.requirePermissions("menus:write", app.deleteDoctorHandler)).Methods("DELETE")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.requirePermissions("doctors:write", app.deleteDoctorHandler)).Methods("DELETE")
+	// v1.HandleFunc("/doctors/{id:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
 
 	// Create a new patient
 	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
 	// Get a specific patient
-	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.getPatientHandler).Methods("GET")
+	v1.HandleFunc("/patients/{id:[0-9]+}", app.getPatientHandler).Methods("GET")
 	// Update a specific patient
-	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.updatePatientHandler).Methods("PUT")
+	v1.HandleFunc("/patients/{id:[0-9]+}", app.updatePatientHandler).Methods("PUT")
 	// Delete a specific patient
-	v1.HandleFunc("/patients/{patientId:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
+	v1.HandleFunc("/patients/{id:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
 
 	users1 := r.PathPrefix("/api/v1").Subrouter()
 	// User handlers with Authentication
@@ -60,5 +62,7 @@ func (app *application) routes() http.Handler {
 	err := http.ListenAndServe(app.config.port, r)
 	log.Fatal(err)
 
+	fmt.Print("Calling authenticate(r) \n\n\n\n\n\n\n\n\n\n ")
+	// Wrap the router with the panic recovery middleware and rate limit middleware.
 	return app.authenticate(r)
 }

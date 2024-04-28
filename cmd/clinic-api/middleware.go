@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -74,19 +75,21 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 // requireAuthenticatedUser checks that the user is not anonymous (i.e., they are authenticated).
 func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Use the contextGetUser helper to retrieve the user information from the request context.
 		user := app.contextGetUser(r)
 
 		// If the user is anonymous, then call authenticationRequiredResponse to inform the client
 		// that they should be authenticated before trying again.
 		if user.IsAnonymous() {
+			log.Print("\n\n Is anonymous \n\n")
 			app.authenticationRequiredResponse(w, r)
 			return
 		}
 
 		next.ServeHTTP(w, r)
-	}
+	})
+	return fn
 }
 
 // requiredActivatedUser checks that the user is both authenticated and activated.
@@ -104,11 +107,15 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 		next.ServeHTTP(w, r)
 	})
 
+	log.Print("\n\n Returnning require activated user function \n\n")
+
 	// Wrap fn with the requireAuthenticatedUser middleware before returning it.
 	return app.requireAuthenticatedUser(fn)
 }
 
 func (app *application) requirePermissions(code string, next http.HandlerFunc) http.HandlerFunc {
+	log.Print("Require permission function \n\n\n\n")
+
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context.
 		user := app.contextGetUser(r)
@@ -116,10 +123,11 @@ func (app *application) requirePermissions(code string, next http.HandlerFunc) h
 		// Get the slice of permission for the user
 		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
 		if err != nil {
+			log.Print("\n\nFucvking error was here: ", user, "  ", user.ID)
 			app.serverErrorResponse(w, r, err)
 			return
 		}
-
+		log.Print("User: ", user.ID)
 		// Check if the slice includes the required permission. If it doesn't, then return a 403
 		// Forbidden response.
 		if !permissions.Include(code) {
@@ -130,7 +138,7 @@ func (app *application) requirePermissions(code string, next http.HandlerFunc) h
 		// Otherwise, they have the required permission so we call the next handler in the chain.
 		next.ServeHTTP(w, r)
 	})
-
+	log.Print("\n\n Returnning require permission function \n\n")
 	// Wrap this with the requireActivatedUser middleware before returning
 	return app.requireActivatedUser(fn)
 }

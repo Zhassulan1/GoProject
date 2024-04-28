@@ -26,7 +26,7 @@ func (app *application) contextSetUser(r *http.Request, user *model.User) *http.
 // in the context, and if it doesn't exist it will firmly be an 'unexpected' error, upon we panic.
 func (app *application) contextGetUser(r *http.Request) *model.User {
 	user, ok := r.Context().Value(userContextKey).(*model.User)
-	fmt.Println("Is there user")
+	fmt.Print("\n\nIs there user\n\n")
 	fmt.Print(user)
 	if !ok {
 		panic("missing user value in request context")
