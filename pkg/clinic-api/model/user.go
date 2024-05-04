@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -281,4 +282,79 @@ func ValidateUser(v *validator.Validator, user *User) {
 		// TODO: fix this panic
 		panic("missing password hash for user")
 	}
+}
+
+func (m UserModel) GetUserByToken(token string) (*User, error) {
+	query := `
+		SELECT user_id --, created_at, updated_at, name, specialty
+		FROM tokens
+		WHERE plain_token = $1 AND expiry > NOW()
+		`
+	var id int
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+
+	// tokenEncoded, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
+	// decodedBytes, err := base32.StdEncoding.DecodeString(token)
+
+	// if err != nil {
+	// 	fmt.Print("error decoding token: ", err)
+	// 	return nil, err
+	// }
+
+	// hash := sha256.Sum256(decodedBytes)
+
+	row := m.DB.QueryRowContext(ctx, query, token)
+
+	// fmt.Print("\nByte hash: ", hash, "\n")
+	err := row.Scan(&id)
+
+	if err != nil {
+		fmt.Print("Error during getting id: ", err, "\n Id value: ", id)
+		return nil, err
+	}
+
+	user, err := m.getById(id)
+
+	if err != nil {
+		fmt.Print("Error during getting user: ", err)
+		return nil, err
+	}
+	return user, nil
+}
+
+func (m UserModel) getById(id int) (*User, error) {
+	query := `
+		SELECT id, created_at, name, email, password_hash, activated, version
+		FROM users
+		WHERE id = $1
+		`
+
+	var user User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+		&user.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
 }

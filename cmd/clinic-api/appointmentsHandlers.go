@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -9,37 +9,6 @@ import (
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
 	"github.com/gorilla/mux"
 )
-
-func (app *application) respondWithError(w http.ResponseWriter, code int, message string) {
-	app.respondWithJSON(w, code, map[string]string{"error": message})
-}
-
-// ? commented since there is new readJSON in helpers.go
-// func (app *application) readJSON(_ http.ResponseWriter, r *http.Request, dst interface{}) error {
-// 	dec := json.NewDecoder(r.Body)
-// 	dec.DisallowUnknownFields()
-
-// 	err := dec.Decode(dst)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-func (app *application) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.Marshal(payload)
-
-	if err != nil {
-		log.Print("Received bad JSON")
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
-		return
-	}
-	log.Print("Successful JSON read")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-}
 
 func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
@@ -53,7 +22,7 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
@@ -69,11 +38,10 @@ func (app *application) createAppointmentHandler(w http.ResponseWriter, r *http.
 	err = app.models.Appointments.Insert(appointment)
 	if err != nil {
 		log.Print(err.Error())
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.errorResponse(w, r, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
-
-	app.respondWithJSON(w, http.StatusCreated, appointment)
+	app.writeJSON(w, http.StatusCreated, envelope{"appointment": appointment}, nil)
 }
 
 func (app *application) getAppointmentHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,17 +50,16 @@ func (app *application) getAppointmentHandler(w http.ResponseWriter, r *http.Req
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid appointment ID")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid appointment ID")
 		return
 	}
 
 	appointment, err := app.models.Appointments.Get(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.errorResponse(w, r, http.StatusNotFound, "404 Not Found")
 		return
 	}
-
-	app.respondWithJSON(w, http.StatusOK, appointment)
+	app.writeJSON(w, http.StatusCreated, envelope{"appointment": appointment}, nil)
 }
 
 func (app *application) updateAppointmentHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,13 +68,13 @@ func (app *application) updateAppointmentHandler(w http.ResponseWriter, r *http.
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid appointment ID")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid appointment ID")
 		return
 	}
 
 	appointment, err := app.models.Appointments.Get(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusNotFound, "404 Not Found")
+		app.errorResponse(w, r, http.StatusNotFound, "404 Not Found")
 		return
 	}
 
@@ -122,7 +89,7 @@ func (app *application) updateAppointmentHandler(w http.ResponseWriter, r *http.
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
@@ -149,28 +116,30 @@ func (app *application) updateAppointmentHandler(w http.ResponseWriter, r *http.
 
 	err = app.models.Appointments.Update(appointment)
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		app.errorResponse(w, r, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
-
-	app.respondWithJSON(w, http.StatusOK, appointment)
+	app.writeJSON(w, http.StatusCreated, envelope{"appointment": appointment}, nil)
 }
 
 func (app *application) deleteAppointmentHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	param := vars["appointmentId"]
-
-	id, err := strconv.Atoi(param)
-	if err != nil || id < 1 {
-		app.respondWithError(w, http.StatusBadRequest, "Invalid appointment ID")
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	err = app.models.Appointments.Delete(id)
 	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "500 Internal Server Error")
+		switch {
+		case errors.Is(err, model.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
-	app.respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	app.writeJSON(w, http.StatusOK, envelope{"message": "success"}, nil)
+
 }
