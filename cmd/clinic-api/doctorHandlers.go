@@ -110,10 +110,12 @@ func (app *application) getDoctorHandler(w http.ResponseWriter, r *http.Request)
 func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	param := vars["doctorId"]
-
+	fmt.Println(param)
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
 		app.errorResponse(w, r, http.StatusBadRequest, "Invalid doctor ID")
+		fmt.Print("\nError: ", err)
+		fmt.Print("\nid: ", id, "\n\n\n")
 		return
 	}
 

@@ -36,11 +36,11 @@ func (app *application) routes() http.Handler {
 	// Get a doctors list by pagination and filters
 	v1.HandleFunc("/doctors", app.SearchDoctorHandler).Methods("GET")
 	// Get a specific doctor
-	v1.HandleFunc("/doctors/{id:[0-9]+}", app.getDoctorHandler).Methods("GET")
+	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.getDoctorHandler).Methods("GET")
 	// Update a specific doctor
-	v1.HandleFunc("/doctors/{id:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
+	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
 	// Delete a specific doctor
-	v1.HandleFunc("/doctors/{id:[0-9]+}", app.requirePermissions("doctors:write", app.deleteDoctorHandler)).Methods("DELETE")
+	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.requirePermissions("doctors:write", app.deleteDoctorHandler)).Methods("DELETE")
 	// v1.HandleFunc("/doctors/{id:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
 
 	// Create a new patient
