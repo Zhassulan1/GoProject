@@ -1,8 +1,11 @@
 package main
 
 import (
+// <<<<<<< docking
+// =======  
 	"fmt"
 	"log"
+// >>>>>>> main
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -58,11 +61,14 @@ func (app *application) routes() http.Handler {
 	users1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
 	users1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
 
+// <<<<<<< docking
+// =======
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)
 	log.Fatal(err)
 
 	fmt.Print("Calling authenticate(r) \n\n\n\n\n\n\n\n\n\n ")
 	// Wrap the router with the panic recovery middleware and rate limit middleware.
+// >>>>>>> main
 	return app.authenticate(r)
 }
