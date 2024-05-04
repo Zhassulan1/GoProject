@@ -90,7 +90,7 @@ func (app *application) SearchDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 func (app *application) getDoctorHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	param := vars["doctorId"]
+	param := vars["id"]
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {

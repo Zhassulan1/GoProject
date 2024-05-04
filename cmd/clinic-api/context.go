@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
@@ -26,11 +26,26 @@ func (app *application) contextSetUser(r *http.Request, user *model.User) *http.
 // in the context, and if it doesn't exist it will firmly be an 'unexpected' error, upon we panic.
 func (app *application) contextGetUser(r *http.Request) *model.User {
 	user, ok := r.Context().Value(userContextKey).(*model.User)
-	fmt.Print("\n\nIs there user\n\n")
-	fmt.Print(user)
+
+	log.Print("\n\nIs there user\n\n")
+	// log.Print(user)
+	authToken := r.Header.Get("Authorization")
+	var err error
 	if !ok {
-		panic("missing user value in request context")
+		user, err = app.models.Users.GetUserByToken(authToken[7:])
+		if err != nil {
+			log.Print("Error getting user \nAuth: ", authToken)
+			log.Println(err)
+			log.Print("\n\n authToken[7:] = ", authToken[7:], "\n\n")
+			panic("could not get user")
+		}
 	}
+
+	log.Print("Auth: ", authToken)
+
+	// if !ok {
+	// 	panic("missing user value in request context")
+	// }
 
 	return user
 }

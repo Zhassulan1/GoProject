@@ -123,7 +123,6 @@ func (app *application) requirePermissions(code string, next http.HandlerFunc) h
 		// Get the slice of permission for the user
 		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
 		if err != nil {
-			log.Print("\n\nFucvking error was here: ", user, "  ", user.ID)
 			app.serverErrorResponse(w, r, err)
 			return
 		}
