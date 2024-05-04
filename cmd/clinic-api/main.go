@@ -25,7 +25,7 @@ import (
 // )
 
 type config struct {
-	port       int
+	port       string
 	env        string
 	fill       bool
 	migrations string
@@ -42,7 +42,7 @@ type application struct {
 }
 
 func main() {
-// <<<<<<< docking
+	// <<<<<<< docking
 	fs := flag.NewFlagSet("demo-app", flag.ContinueOnError)
 
 	// var cfg config
@@ -54,17 +54,17 @@ func main() {
 		cfg        config
 		fill       = fs.Bool("fill", false, "Fill database with dummy data")
 		migrations = fs.String("migrations", "", "Path to migration files folder. If not provided, migrations do not applied")
-		port       = fs.Int("port", 8060, "API server port")
+		port       = fs.String("port", ":8060", "API server port")
 		env        = fs.String("env", "development", "Environment (development|staging|production)")
 		dbDsn      = fs.String("dsn", "postgres://postgres:1234@db:5432/medicalclinic?sslmode=disable", "PostgreSQL DSN")
 	)
-// =======
-// 	var cfg config
-// 	flag.StringVar(&cfg.port, "port", ":8081", "API server port")
-// 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-// 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:Yekanai11@localhost/medicalclinic?sslmode=disable", "PostgreSQL DSN")
-// 	flag.Parse()
-// >>>>>>> main
+	// =======
+	// 	var cfg config
+	// 	flag.StringVar(&cfg.port, "port", ":8081", "API server port")
+	// 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	// 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:Yekanai11@localhost/medicalclinic?sslmode=disable", "PostgreSQL DSN")
+	// 	flag.Parse()
+	// >>>>>>> main
 
 	// Init logger
 	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
@@ -81,7 +81,7 @@ func main() {
 	cfg.migrations = *migrations
 
 	logger.PrintInfo("starting application with configuration", map[string]string{
-		"port":       fmt.Sprintf("%d", cfg.port),
+		"port":       fmt.Sprintf(cfg.port),
 		"fill":       fmt.Sprintf("%t", cfg.fill),
 		"env":        cfg.env,
 		"db":         cfg.db.dsn,
