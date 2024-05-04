@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8060:8060
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=1234
+      - DB_NAME=midical_clinic
+    
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./pkg/social-media/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://postgres:admin@db:5432/midical_clinic?sslmode=disable", "up"]
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

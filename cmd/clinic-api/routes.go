@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -55,10 +54,6 @@ func (app *application) routes() http.Handler {
 	users1.HandleFunc("/users", app.registerUserHandler).Methods("POST")
 	users1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
 	users1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
-
-	log.Printf("Starting server on %s\n", app.config.port)
-	err := http.ListenAndServe(app.config.port, r)
-	log.Fatal(err)
 
 	return app.authenticate(r)
 }
