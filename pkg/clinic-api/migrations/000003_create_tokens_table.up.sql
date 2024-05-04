@@ -5,3 +5,4 @@ CREATE TABLE IF NOT EXISTS tokens
 	expiry  TIMESTAMP(0) WITH TIME ZONE NOT NULL,
 	scope   TEXT                        NOT NULL
 );
+ALTER TABLE tokens ADD COLUMN plain_token TEXT;

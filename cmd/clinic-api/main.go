@@ -42,6 +42,7 @@ type application struct {
 }
 
 func main() {
+// <<<<<<< docking
 	fs := flag.NewFlagSet("demo-app", flag.ContinueOnError)
 
 	// var cfg config
@@ -57,6 +58,13 @@ func main() {
 		env        = fs.String("env", "development", "Environment (development|staging|production)")
 		dbDsn      = fs.String("dsn", "postgres://postgres:1234@db:5432/medicalclinic?sslmode=disable", "PostgreSQL DSN")
 	)
+// =======
+// 	var cfg config
+// 	flag.StringVar(&cfg.port, "port", ":8081", "API server port")
+// 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+// 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:Yekanai11@localhost/medicalclinic?sslmode=disable", "PostgreSQL DSN")
+// 	flag.Parse()
+// >>>>>>> main
 
 	// Init logger
 	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)

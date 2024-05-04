@@ -23,7 +23,7 @@ type (
 	// Note, it includes plaintext and hashed version of the token.
 	Token struct {
 		Plaintext string    `json:"token"`
-		Hash      []byte    `json:"-"`
+		Hash      []byte    `json:"token_hash"`
 		UserID    int64     `json:"-"`
 		Expiry    time.Time `json:"expiry"`
 		Scope     string    `json:"-"`
@@ -53,11 +53,11 @@ func (m TokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, 
 // Insert inserts a new token record into the tokens table.
 func (m TokenModel) Insert(token *Token) error {
 	query := `
-		INSERT INTO tokens (hash, user_id, expiry, scope)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO tokens (hash, user_id, expiry, scope, plain_token)
+		VALUES ($1, $2, $3, $4, $5)
 		`
 
-	args := []interface{}{token.Hash, token.UserID, token.Expiry, token.Scope}
+	args := []interface{}{token.Hash, token.UserID, token.Expiry, token.Scope, token.Plaintext}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
