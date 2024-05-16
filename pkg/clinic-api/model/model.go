@@ -28,6 +28,7 @@ type Models struct {
 	Users        UserModel
 	Tokens       TokenModel
 	Permissions  PermissionModel
+	Clinics      ClinicModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -47,6 +48,11 @@ func NewModels(db *sql.DB) Models {
 			ErrorLog: errorLog,
 		},
 		Patients: PatientModel{
+			DB:       db,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
+		},
+		Clinics: ClinicModel{
 			DB:       db,
 			InfoLog:  infoLog,
 			ErrorLog: errorLog,

@@ -56,6 +56,17 @@ func (app *application) routes() http.Handler {
 	// Delete a specific patient
 	v1.HandleFunc("/patients/{id:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
 
+	// Create a new clinic
+	v1.HandleFunc("/clinics", app.createClinicHandler).Methods("POST")
+	// Get a specific clinic
+	v1.HandleFunc("/clinics/{id:[0-9]+}", app.getClinicHandler).Methods("GET")
+	// Get a clinics list by pagination and filters
+	v1.HandleFunc("/clinics", app.searchClinicHandler).Methods("GET")
+	// Update a specific clinic
+	v1.HandleFunc("/clinics/{id:[0-9]+}", app.updateClinicHandler).Methods("PUT")
+	// Delete a specific clinic
+	v1.HandleFunc("/clinics/{id:[0-9]+}", app.deleteClinicHandler).Methods("DELETE")
+
 	users1 := r.PathPrefix("/api/v1").Subrouter()
 	// User handlers with Authentication
 	users1.HandleFunc("/users", app.registerUserHandler).Methods("POST")
