@@ -107,15 +107,11 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 		next.ServeHTTP(w, r)
 	})
 
-	log.Print("\n\n Returnning require activated user function \n\n")
-
 	// Wrap fn with the requireAuthenticatedUser middleware before returning it.
 	return app.requireAuthenticatedUser(fn)
 }
 
 func (app *application) requirePermissions(code string, next http.HandlerFunc) http.HandlerFunc {
-	log.Print("Require permission function \n\n\n\n")
-
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context.
 		user := app.contextGetUser(r)
@@ -137,7 +133,6 @@ func (app *application) requirePermissions(code string, next http.HandlerFunc) h
 		// Otherwise, they have the required permission so we call the next handler in the chain.
 		next.ServeHTTP(w, r)
 	})
-	log.Print("\n\n Returnning require permission function \n\n")
 	// Wrap this with the requireActivatedUser middleware before returning
 	return app.requireActivatedUser(fn)
 }
