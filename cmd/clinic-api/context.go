@@ -30,6 +30,12 @@ func (app *application) contextGetUser(r *http.Request) *model.User {
 	log.Print("\n\nIs there user\n\n")
 	// log.Print(user)
 	authToken := r.Header.Get("Authorization")
+
+	if len(authToken) < 8 {
+		log.Print("Error getting user \nAuth: ", authToken)
+		return model.AnonymousUser
+	}
+
 	var err error
 	if !ok {
 		user, err = app.models.Users.GetUserByToken(authToken[7:])
