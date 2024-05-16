@@ -28,6 +28,8 @@ func (app *application) routes() http.Handler {
 	// CLinic Singleton
 	// Create a new appointment
 	v1.HandleFunc("/appointments", app.createAppointmentHandler).Methods("POST")
+	// Get a doctors list by pagination and filters
+	v1.HandleFunc("/appointments", app.SearchAppointmentHandler).Methods("GET")
 	// Get a specific appointment
 	v1.HandleFunc("/appointments/{id:[0-9]+}", app.getAppointmentHandler).Methods("GET")
 	// Update a specific appointment
@@ -49,6 +51,8 @@ func (app *application) routes() http.Handler {
 
 	// Create a new patient
 	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
+	// Get a doctors list by pagination and filters
+	v1.HandleFunc("/patients", app.SearchPatientHandler).Methods("GET")
 	// Get a specific patient
 	v1.HandleFunc("/patients/{id:[0-9]+}", app.getPatientHandler).Methods("GET")
 	// Update a specific patient
