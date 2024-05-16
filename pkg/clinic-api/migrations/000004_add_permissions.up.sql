@@ -15,4 +15,6 @@ INSERT INTO permissions (code)
 VALUES ('doctors:read'),
        ('doctors:write'),
        ('patients:read'),
-       ('patients:write');
+       ('patients:write'),
+       ('appointments:read'),
+       ('appointments:write');

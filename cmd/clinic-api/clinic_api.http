@@ -33,7 +33,7 @@ POST http://localhost:8081/api/v1/patients HTTP/1.1
 Content-Type: application/json
 
 {
-    "Name": "John2",
+    "Name": "John1",
     "Birthdate": "2004/03/25",
     "Gender": "man"
 }
