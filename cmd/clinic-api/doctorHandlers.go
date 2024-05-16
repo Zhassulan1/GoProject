@@ -28,8 +28,7 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// user starts
-
+	//* USER PART STARTS
 	user := &model.User{
 		Name:  input.Name,
 		Email: input.Email,
@@ -86,7 +85,7 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		User  *model.User `json:"user"`
 	}
 
-	// user ends
+	//* USER PART ENDS
 
 	// doctor continuation
 
