@@ -77,12 +77,15 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.HandlerFunc {
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Use the contextGetUser helper to retrieve the user information from the request context.
-		user := app.contextGetUser(r)
-
+		user, err := app.contextGetUser(r)
+		if err != nil {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
 		// If the user is anonymous, then call authenticationRequiredResponse to inform the client
 		// that they should be authenticated before trying again.
 		if user.IsAnonymous() {
-			log.Print("\n\n Is anonymous \n\n")
+			log.Print("\n\n Anonymous User \n\n")
 			app.authenticationRequiredResponse(w, r)
 			return
 		}
@@ -96,8 +99,11 @@ func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.Han
 func (app *application) requireActivatedUser(next http.HandlerFunc) http.HandlerFunc {
 	// Rather than returning this http.HandlerFunc we assign it to the variable fn.
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := app.contextGetUser(r)
-
+		user, err := app.contextGetUser(r)
+		if err != nil {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
 		// Check that a user is activated
 		if !user.Activated {
 			app.inactiveAccountResponse(w, r)
@@ -114,8 +120,11 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 func (app *application) requirePermissions(code string, next http.HandlerFunc) http.HandlerFunc {
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the user from the request context.
-		user := app.contextGetUser(r)
-
+		user, err := app.contextGetUser(r)
+		if err != nil {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
 		// Get the slice of permission for the user
 		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
 		if err != nil {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 
@@ -24,34 +25,29 @@ func (app *application) contextSetUser(r *http.Request, user *model.User) *http.
 // contextGetUser retrieves the User struct from the request context. The only time that
 // this helper should be used is when we logically expect there to be a User struct value
 // in the context, and if it doesn't exist it will firmly be an 'unexpected' error, upon we panic.
-func (app *application) contextGetUser(r *http.Request) *model.User {
+func (app *application) contextGetUser(r *http.Request) (*model.User, error) {
+	var err error
 	user, ok := r.Context().Value(userContextKey).(*model.User)
 
 	log.Print("\n\nIs there user\n\n")
-	// log.Print(user)
 	authToken := r.Header.Get("Authorization")
 
 	if len(authToken) < 8 {
 		log.Print("Error getting user \nAuth: ", authToken)
-		return model.AnonymousUser
+		return model.AnonymousUser, errors.New("invalid or missing authentication token")
 	}
 
-	var err error
-	if !ok {
-		user, err = app.models.Users.GetUserByToken(authToken[7:])
-		if err != nil {
-			log.Print("Error getting user \nAuth: ", authToken)
-			log.Println(err)
-			log.Print("\n\n authToken[7:] = ", authToken[7:], "\n\n")
-			panic("could not get user")
-		}
+	if ok {
+		return user, nil
+	}
+
+	user, err = app.models.Users.GetUserByToken(authToken[7:])
+	if err != nil {
+		log.Print(err, "\n\n authToken[7:] = ", authToken[7:], "\n\n")
+		return model.AnonymousUser, errors.New("invalid or missing authentication token")
 	}
 
 	log.Print("Auth: ", authToken)
 
-	// if !ok {
-	// 	panic("missing user value in request context")
-	// }
-
-	return user
+	return user, nil
 }
