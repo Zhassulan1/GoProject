@@ -15,6 +15,7 @@ type Doctor struct {
 	UpdatedAt string `json:"updatedAt"`
 	Name      string `json:"name"`
 	Specialty string `json:"specialty"`
+	ClinicID  int    `json:"clinic_id"`
 }
 
 type DoctorPagination struct {
@@ -38,4 +39,13 @@ type Appointment struct {
 	StartTime string `json:"startTime"`
 	EndTime   string `json:"endTime"`
 	Status    string `json:"status"`
+}
+
+type Clinic struct {
+	Id        string `json:"id"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	City      string `json:"city"`
 }

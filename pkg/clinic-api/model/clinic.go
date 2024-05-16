@@ -8,44 +8,47 @@ import (
 	"time"
 )
 
-type DoctorModel struct {
+type ClinicModel struct {
 	DB       *sql.DB
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
 }
 
-func (m DoctorModel) Insert(doctor *Doctor) error {
+
+func (m ClinicModel) Insert(clinic *Clinic) error {
 	query := `
-		INSERT INTO doctors (name, specialty, clinic_id) 
+		INSERT INTO clinics (name, city, address) 
 		VALUES ($1, $2, $3) 
 		RETURNING id, created_at, updated_at
 		`
-	args := []interface{}{doctor.Name, doctor.Specialty, doctor.ClinicID}
+	args := []interface{}{clinic.Name, clinic.City, clinic.Address}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(
-		&doctor.Id,
-		&doctor.CreatedAt,
-		&doctor.UpdatedAt,
+		&clinic.Id,
+		&clinic.CreatedAt,
+		&clinic.UpdatedAt,
 	)
 }
 
-func (m DoctorModel) GetAll(name, specialty string, filters Filters) ([]*Doctor, Metadata, error) {
+
+func (m ClinicModel) GetAll(name, city string, filters Filters) ([]*Clinic, Metadata, error) {
 	query := fmt.Sprintf(
 		`
-		SELECT count(*) OVER(), id, created_at, updated_at, name, specialty, clinic_id
-		FROM doctors
+		SELECT count(*) OVER(), id, created_at, updated_at, name, city, address
+		FROM clinics
 		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
-		AND (LOWER(specialty) = LOWER($2) OR $2 = '')
+		AND (LOWER(city) = LOWER($2) OR $2 = '')
 		ORDER BY %s %s, id ASC
-		LIMIT $3 OFFSET $4		`,
+		LIMIT $3 OFFSET $4
+		`,
 		filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{name, specialty, filters.limit(), filters.offset()}
+	args := []interface{}{name, city, filters.limit(), filters.offset()}
 
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -59,14 +62,15 @@ func (m DoctorModel) GetAll(name, specialty string, filters Filters) ([]*Doctor,
 	}()
 
 	totalRecords := 0
-	var doctors []*Doctor
+	var clinics []*Clinic
+
 	for rows.Next() {
-		var doctor Doctor
-		err := rows.Scan(&totalRecords, &doctor.Id, &doctor.CreatedAt, &doctor.UpdatedAt, &doctor.Name, &doctor.Specialty, &doctor.ClinicID)
+		var clinic Clinic
+		err := rows.Scan(&totalRecords, &clinic.Id, &clinic.CreatedAt, &clinic.UpdatedAt, &clinic.Name, &clinic.City, &clinic.Address)
 		if err != nil {
 			return nil, Metadata{}, err
 		}
-		doctors = append(doctors, &doctor)
+		clinics = append(clinics, &clinic)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -75,58 +79,61 @@ func (m DoctorModel) GetAll(name, specialty string, filters Filters) ([]*Doctor,
 
 	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
 
-	return doctors, metadata, nil
+	return clinics, metadata, nil
 }
 
-func (m DoctorModel) Get(id int) (*Doctor, error) {
+
+func (m ClinicModel) Get(id int) (*Clinic, error) {
 	query := `
-		SELECT id, created_at, updated_at, name, specialty, clinic_id
-		FROM doctors
+		SELECT id, created_at, updated_at, name, city, address
+		FROM clinics
 		WHERE id = $1
 		`
-	var doctor Doctor
+	var clinic Clinic
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, query, id)
 	err := row.Scan(
-		&doctor.Id,
-		&doctor.CreatedAt,
-		&doctor.UpdatedAt,
-		&doctor.Name,
-		&doctor.Specialty,
-		&doctor.ClinicID,
+		&clinic.Id,
+		&clinic.CreatedAt,
+		&clinic.UpdatedAt,
+		&clinic.Name,
+		&clinic.City,
+		&clinic.Address,
 	)
 
 	if err != nil {
 		return nil, err
 	}
-	return &doctor, nil
+	return &clinic, nil
 }
 
-func (m DoctorModel) Update(doctor *Doctor) error {
+
+func (m ClinicModel) Update(clinic *Clinic) error {
 	query := `
-		UPDATE doctors
-		SET name = $1, specialty = $2, clinic_id = $3
+		UPDATE clinics
+		SET name = $1, city = $2, address = $3
 		WHERE id = $4
 		RETURNING updated_at
 		`
 	args := []interface{}{
-		doctor.Name,
-		doctor.Specialty,
-		doctor.ClinicID,
-		doctor.Id,
+		clinic.Name,
+		clinic.City,
+		clinic.Address,
+		clinic.Id,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&doctor.UpdatedAt)
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&clinic.UpdatedAt)
 }
 
-func (m DoctorModel) Delete(id int) error {
+
+func (m ClinicModel) Delete(id int) error {
 	query := `
-		DELETE FROM doctors
+		DELETE FROM clinics
 		WHERE id = $1
 		`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

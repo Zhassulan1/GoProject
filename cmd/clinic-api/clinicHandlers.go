@@ -12,11 +12,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createClinicHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name      string `json:"name"`
-		Specialty string `json:"specialty"`
-		ClinicID  int 	 `json:"clinic_id"`
+		Name    string `json:"name"`
+		City    string `json:"city"`
+		Address string `json:"address"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -25,30 +25,25 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	doctor := &model.Doctor{
-		Name:      input.Name,
-		Specialty: input.Specialty,
-		ClinicID:  input.ClinicID,
+	clinic := &model.Clinic{
+		Name:    input.Name,
+		City:    input.City,
+		Address: input.Address,
 	}
 
-	err = app.models.Doctors.Insert(doctor)
+	err = app.models.Clinics.Insert(clinic)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	app.writeJSON(w, http.StatusCreated, envelope{"doctor": doctor}, nil)
+	app.writeJSON(w, http.StatusCreated, envelope{"clinic": clinic}, nil)
 }
 
-// ???????????????????????
-// ???????????????????????
-// ???????????????????????
-// ???????????????????????
-
-func (app *application) SearchDoctorHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) searchClinicHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name      string `json:"name"`
-		Specialty string `json:"specialty"`
+		Name    string `json:"name"`
+		City    string `json:"city"`
 		model.Filters
 	}
 
@@ -56,7 +51,7 @@ func (app *application) SearchDoctorHandler(w http.ResponseWriter, r *http.Reque
 	qs := r.URL.Query()
 
 	input.Name = app.readStrings(qs, "name", "")
-	input.Specialty = app.readStrings(qs, "specialty", "")
+	input.City = app.readStrings(qs, "city", "")
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
@@ -65,71 +60,66 @@ func (app *application) SearchDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	input.Filters.SortSafeList = []string{
 		// ascending sort values
-		"id", "name", "specialty", "created_at", "updated_at",
+		"id", "name", "city", "created_at", "updated_at",
 		// descending sort values
-		"-id", "-name", "-specialty", "-created_at", "-updated_at",
+		"-id", "-name", "-city", "-created_at", "-updated_at",
 	}
 
 	if model.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	doctors, metadata, err := app.models.Doctors.GetAll(input.Name, input.Specialty, input.Filters)
+	clinics, metadata, err := app.models.Clinics.GetAll(input.Name, input.City, input.Filters)
 	if err != nil {
-		fmt.Println("We are in search doctor handler", "\nname: ", input.Name, "\nspec:", input.Specialty, "\n", input.Filters)
+		fmt.Println("We are in search clinic handler", "\nname: ", input.Name, "\ncity:", input.City, "\n", input.Filters)
 		fmt.Print("\nError: ", err)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, envelope{"doctors": doctors, "metadata": metadata}, nil)
+	app.writeJSON(w, http.StatusOK, envelope{"clinics": clinics, "metadata": metadata}, nil)
 }
 
-// ???????????????????????
-// ???????????????????????
-// ???????????????????????
-// ???????????????????????
-
-func (app *application) getDoctorHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) getClinicHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	param := vars["id"]
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
-		app.errorResponse(w, r, http.StatusBadRequest, "Invalid doctor ID")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid clinic ID")
 		return
 	}
 
-	doctor, err := app.models.Doctors.Get(id)
+	clinic, err := app.models.Clinics.Get(id)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusNotFound, "404 Not Found")
 		return
 	}
-	app.writeJSON(w, http.StatusOK, envelope{"doctor": doctor}, nil)
-	// app.respondWithJSON(w, http.StatusOK, doctor)
+	app.writeJSON(w, http.StatusOK, envelope{"clinic": clinic}, nil)
 }
 
-func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) updateClinicHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	param := vars["doctorId"]
+	param := vars["id"]
 	fmt.Println(param)
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
-		app.errorResponse(w, r, http.StatusBadRequest, "Invalid doctor ID")
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid clinic ID")
 		fmt.Print("\nError: ", err)
 		fmt.Print("\nid: ", id, "\n\n\n")
 		return
 	}
 
-	doctor, err := app.models.Doctors.Get(id)
+	clinic, err := app.models.Clinics.Get(id)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusNotFound, "404 Not Found")
 		return
 	}
 
 	var input struct {
-		Name      *string `json:"name"`
-		Specialty *string `json:"specialty"`
+		Name    *string `json:"name"`
+		City    *string `json:"city"`
+		Address *string `json:"address"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -139,23 +129,27 @@ func (app *application) updateDoctorHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if input.Name != nil {
-		doctor.Name = *input.Name
+		clinic.Name = *input.Name
 	}
 
-	if input.Specialty != nil {
-		doctor.Specialty = *input.Specialty
+	if input.City != nil {
+		clinic.City = *input.City
 	}
 
-	err = app.models.Doctors.Update(doctor)
+	if input.Address != nil {
+		clinic.Address = *input.Address
+	}
+
+	err = app.models.Clinics.Update(clinic)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusInternalServerError, "500 Internal Server Error")
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, envelope{"doctor": doctor}, nil)
+	app.writeJSON(w, http.StatusOK, envelope{"clinic": clinic}, nil)
 }
 
-func (app *application) deleteDoctorHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) deleteClinicHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
@@ -163,7 +157,7 @@ func (app *application) deleteDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.models.Doctors.Delete(id)
+	err = app.models.Clinics.Delete(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, model.ErrRecordNotFound):
