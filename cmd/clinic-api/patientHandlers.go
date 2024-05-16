@@ -177,7 +177,7 @@ func (app *application) getPatientHandler(w http.ResponseWriter, r *http.Request
 
 func (app *application) updatePatientHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	param := vars["patientId"]
+	param := vars["id"]
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {
