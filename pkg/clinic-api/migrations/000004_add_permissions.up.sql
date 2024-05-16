@@ -13,4 +13,6 @@ CREATE TABLE IF NOT EXISTS users_permissions
 
 INSERT INTO permissions (code)
 VALUES ('doctors:read'),
-       ('doctors:write');
+       ('doctors:write'),
+       ('patients:read'),
+       ('patients:write');
