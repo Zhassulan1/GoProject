@@ -17,4 +17,6 @@ VALUES ('doctors:read'),
        ('patients:read'),
        ('patients:write'),
        ('appointments:read'),
-       ('appointments:write');
+       ('appointments:write'),
+       ('clinics:read'),
+       ('clinics:write');

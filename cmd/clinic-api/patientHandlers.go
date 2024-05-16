@@ -65,7 +65,15 @@ func (app *application) createPatientHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.models.Permissions.AddForUser(user.ID, "patients:write", "clinics:read", "doctors:read", "appointments:write")
+	err = app.models.Permissions.AddForUser(user.ID,
+		"patients:write",
+		"patients:read",
+		"doctors:read",
+		"appointments:write",
+		"appointments:read",
+		"clinics:read",
+	)
+
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -110,8 +118,8 @@ func (app *application) createPatientHandler(w http.ResponseWriter, r *http.Requ
 
 func (app *application) SearchPatientHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name      string `json:"name"`
-		Gender	  string `json:"gender"`
+		Name   string `json:"name"`
+		Gender string `json:"gender"`
 		model.Filters
 	}
 
@@ -133,7 +141,7 @@ func (app *application) SearchPatientHandler(w http.ResponseWriter, r *http.Requ
 		"-id", "-name", "-birthdate", "-gender", "-created_at", "-updated_at",
 	}
 
-	if model.ValidateFilters(v, input.Filters); !v.Valid(){
+	if model.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}

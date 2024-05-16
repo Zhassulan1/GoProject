@@ -65,7 +65,15 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.models.Permissions.AddForUser(user.ID, "doctors:write", "clinics:read", "patients:read", "appointments:read")
+	err = app.models.Permissions.AddForUser(user.ID,
+		"doctors:write",
+		"doctors:read",
+		"patients:read",
+		"appointments:read",
+		"appointments:read",
+		"clinics:read",
+	)
+
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
