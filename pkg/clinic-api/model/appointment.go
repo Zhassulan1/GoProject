@@ -2,8 +2,8 @@ package model
 
 import (
 	"context"
-	"time"
 	"fmt"
+	"time"
 )
 
 func (m AppointmentModel) Insert(appointment *Appointment) error {
