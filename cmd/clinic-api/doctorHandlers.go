@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model"
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/validator"
@@ -16,7 +17,9 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 	var input struct {
 		Name      string `json:"name"`
 		Specialty string `json:"specialty"`
-		ClinicID  int 	 `json:"clinic_id"`
+		ClinicID  int    `json:"clinic_id"`
+		Email     string `json:"email"`
+		Password  string `json:"password"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -25,10 +28,72 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	//* USER PART STARTS
+	user := &model.User{
+		Name:  input.Name,
+		Email: input.Email,
+	}
+
+	err = user.Password.Set(input.Password)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+
+	// Validate the user struct and return the error messages to the client if
+	// any of the checks fail.
+	if model.ValidateUser(v, user); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.Users.Insert(user)
+	if err != nil {
+		switch {
+		// If we get an ErrDuplicateEmail error, use the v.AddError() method to manually add
+		// a message to the validator instance, and then call our failedValidationResponse
+		// helper().
+		case errors.Is(err, model.ErrDuplicateEmail):
+			v.AddError("email", "a user with this email address already exists")
+
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// TODO: add clinics read permission
+	err = app.models.Permissions.AddForUser(user.ID, "doctors:read")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// After the user record has been created in the database, generate a new activation
+	// token for the user.
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, model.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	var res struct {
+		Token *string     `json:"token"`
+		User  *model.User `json:"user"`
+	}
+
+	//* USER PART ENDS
+
+	// doctor continuation
+
 	doctor := &model.Doctor{
 		Name:      input.Name,
 		Specialty: input.Specialty,
 		ClinicID:  input.ClinicID,
+		UserID:    user.ID,
 	}
 
 	err = app.models.Doctors.Insert(doctor)
@@ -37,7 +102,10 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	app.writeJSON(w, http.StatusCreated, envelope{"doctor": doctor}, nil)
+	res.Token = &token.Plaintext
+	res.User = user
+
+	app.writeJSON(w, http.StatusCreated, envelope{"doctor": doctor, "user": res}, nil)
 }
 
 // ???????????????????????

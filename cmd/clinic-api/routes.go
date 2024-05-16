@@ -40,12 +40,11 @@ func (app *application) routes() http.Handler {
 	// Get a doctors list by pagination and filters
 	v1.HandleFunc("/doctors", app.SearchDoctorHandler).Methods("GET")
 	// Get a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.getDoctorHandler).Methods("GET")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.getDoctorHandler).Methods("GET")
 	// Update a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.updateDoctorHandler).Methods("PUT")
 	// Delete a specific doctor
-	v1.HandleFunc("/doctors/{doctorId:[0-9]+}", app.requirePermissions("doctors:write", app.deleteDoctorHandler)).Methods("DELETE")
-	// v1.HandleFunc("/doctors/{id:[0-9]+}", app.deleteDoctorHandler).Methods("DELETE")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.requirePermissions("doctors:write", app.deleteDoctorHandler)).Methods("DELETE")
 
 	// Create a new patient
 	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
@@ -73,16 +72,14 @@ func (app *application) routes() http.Handler {
 	users1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
 	users1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
 
-	// <<<<<<< docking
-	// =======
 	log.Printf("Starting server on %s\n", app.config.port)
-	
+
 	err := http.ListenAndServe(app.config.port, r)
 
 	log.Fatal("ListenAndServe Err: ", err)
 
 	fmt.Print("Calling authenticate(r) \n\n\n\n\n\n\n\n\n\n ")
 	// Wrap the router with the panic recovery middleware and rate limit middleware.
-	// >>>>>>> main
+
 	return app.authenticate(r)
 }

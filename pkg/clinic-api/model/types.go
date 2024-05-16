@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Patient struct {
 	Id        string `json:"id"`
 	CreatedAt string `json:"createdAt"`
@@ -16,6 +18,17 @@ type Doctor struct {
 	Name      string `json:"name"`
 	Specialty string `json:"specialty"`
 	ClinicID  int    `json:"clinic_id"`
+	UserID    int64  `json:"user_id"`
+}
+
+type User struct {
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  password  `json:"-"`
+	Activated bool      `json:"activated"`
+	Version   int       `json:"-"`
 }
 
 type DoctorPagination struct {

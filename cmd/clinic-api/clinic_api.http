@@ -4,8 +4,9 @@ POST http://localhost:8081/api/v1/doctors HTTP/1.1
 Content-Type: application/json
 
 {
-    "Name": "MAX6",
-    "Specialty": "Surgeon"
+    "Name": "MAX1",
+    "Specialty": "Surgeon",
+    "clinic_id": 1
 }
 
 ### Get doctors Item
