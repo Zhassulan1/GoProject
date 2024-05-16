@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"time"
+	"fmt"
 )
 
 type PatientModel struct {
@@ -34,6 +35,54 @@ func (m PatientModel) Insert(patient *Patient) error {
 		&patient.CreatedAt,
 		&patient.UpdatedAt,
 	)
+}
+
+func (m PatientModel) GetAll(name, gender string, filters Filters) ([]*Patient, Metadata, error) {
+	query := fmt.Sprintf(
+		`
+		SELECT count(*) OVER(), id, created_at, updated_at, name, birthdate, gender
+		FROM patients
+		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
+		AND (gender = $2 OR $2 = '')
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4		
+		`,
+		filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []interface{}{name, gender, filters.limit(), filters.offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			m.ErrorLog.Println(err)
+		}
+	}()
+
+	totalRecords := 0
+	var patients []*Patient
+	for rows.Next() {
+		var patient Patient
+		err := rows.Scan(&totalRecords, &patient.Id, &patient.CreatedAt, &patient.UpdatedAt, &patient.Name, &patient.Birthdate, &patient.Gender)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+		patients = append(patients, &patient)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return patients, metadata, nil
 }
 
 func (m PatientModel) Get(id int) (*Patient, error) {
