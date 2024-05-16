@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -107,9 +108,49 @@ func (app *application) createPatientHandler(w http.ResponseWriter, r *http.Requ
 	app.writeJSON(w, http.StatusCreated, envelope{"patient": patient, "user": res}, nil)
 }
 
+func (app *application) SearchPatientHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Name      string `json:"name"`
+		Gender	  string `json:"gender"`
+		model.Filters
+	}
+
+	v := validator.New()
+	qs := r.URL.Query()
+
+	input.Name = app.readStrings(qs, "name", "")
+	input.Gender = app.readStrings(qs, "gender", "")
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	input.Filters.Sort = app.readStrings(qs, "sort", "id")
+
+	input.Filters.SortSafeList = []string{
+		//ascending sort values
+		"id", "name", "birthdate", "gender", "created_at", "updated_at",
+		//descending sort values
+		"-id", "-name", "-birthdate", "-gender", "-created_at", "-updated_at",
+	}
+
+	if model.ValidateFilters(v, input.Filters); !v.Valid(){
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+	patients, metadata, err := app.models.Patients.GetAll(input.Name, input.Gender, input.Filters)
+	if err != nil {
+		fmt.Println("We are in search patient handler", "\nname: ", input.Name, "\nbirthdate: ", input.Gender, "\n", input.Filters)
+		fmt.Print("\nError: ", err)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, envelope{"patients": patients, "metadata": metadata}, nil)
+}
+
 func (app *application) getPatientHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	param := vars["patientId"]
+	param := vars["id"]
 
 	id, err := strconv.Atoi(param)
 	if err != nil || id < 1 {

@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"time"
+	"fmt"
 )
 
 func (m AppointmentModel) Insert(appointment *Appointment) error {
@@ -28,6 +29,55 @@ func (m AppointmentModel) Insert(appointment *Appointment) error {
 		&appointment.CreatedAt,
 		&appointment.UpdatedAt,
 	)
+}
+func (m AppointmentModel) GetAll(patientId, doctorId, date, status string, filters Filters) ([]*Appointment, Metadata, error) {
+	query := fmt.Sprintf(
+		`
+		SELECT count(*) OVER(), id,  created_at, updated_at, patient_id, doctor_id, date, start_time, end_time, status
+		FROM appointments
+		WHERE (patient_id::TEXT ILIKE $1 OR $1 = '')
+		AND (doctor_id::TEXT ILIKE $2 OR $2 = '')
+		AND (date::TEXT ILIKE $3 OR $3 = '')
+		AND (status ILIKE $4 OR $4 = '')
+		ORDER BY %s %s, id ASC
+		LIMIT $5 OFFSET $6
+		`,
+		filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []interface{}{patientId, doctorId, date, status, filters.limit(), filters.offset()}
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			m.ErrorLog.Println(err)
+		}
+	}()
+
+	totalRecords := 0
+	var appointments []*Appointment
+	for rows.Next() {
+		var appointment Appointment
+		err := rows.Scan(&totalRecords, &appointment.Id, &appointment.CreatedAt, &appointment.UpdatedAt, &appointment.PatientId, &appointment.DoctorId, &appointment.Date, &appointment.StartTime, &appointment.EndTime, &appointment.Status)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+		appointments = append(appointments, &appointment)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return appointments, metadata, nil
 }
 
 func (m AppointmentModel) Get(id int) (*Appointment, error) {

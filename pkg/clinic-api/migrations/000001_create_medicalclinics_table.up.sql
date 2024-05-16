@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS doctors
     updated_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now()
 );
 
-
 CREATE TABLE IF NOT EXISTS appointments
 (
     id         BIGSERIAL PRIMARY KEY,

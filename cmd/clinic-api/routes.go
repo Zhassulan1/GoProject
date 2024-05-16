@@ -23,11 +23,15 @@ func (app *application) routes() http.Handler {
 	// error handler for 405 Method Not Allowed responses
 	r.MethodNotAllowedHandler = http.HandlerFunc(app.methodNotAllowedResponse)
 
+	r.HandleFunc("/api/v1/healthcheck", app.healthcheckHandler).Methods("GET")
+
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
 	// CLinic Singleton
 	// Create a new appointment
 	v1.HandleFunc("/appointments", app.createAppointmentHandler).Methods("POST")
+	// Get a doctors list by pagination and filters
+	v1.HandleFunc("/appointments", app.SearchAppointmentHandler).Methods("GET")
 	// Get a specific appointment
 	v1.HandleFunc("/appointments/{id:[0-9]+}", app.getAppointmentHandler).Methods("GET")
 	// Update a specific appointment
@@ -48,6 +52,8 @@ func (app *application) routes() http.Handler {
 
 	// Create a new patient
 	v1.HandleFunc("/patients", app.createPatientHandler).Methods("POST")
+	// Get a doctors list by pagination and filters
+	v1.HandleFunc("/patients", app.SearchPatientHandler).Methods("GET")
 	// Get a specific patient
 	v1.HandleFunc("/patients/{id:[0-9]+}", app.getPatientHandler).Methods("GET")
 	// Update a specific patient
