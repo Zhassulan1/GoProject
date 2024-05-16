@@ -11,7 +11,7 @@ import (
 	"github.com/Zhassulan1/Go_Project/pkg/clinic-api/model/filler"
 	"github.com/Zhassulan1/Go_Project/pkg/jsonlog"
 
-	// "github.com/Zhassulan1/Go_Project/pkg/vcs"
+	"github.com/Zhassulan1/Go_Project/pkg/vcs"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -20,9 +20,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// var (
-// 	version = vcs.Version()
-// )
+var (
+	version = vcs.Version()
+)
 
 type config struct {
 	port       string
