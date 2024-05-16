@@ -53,7 +53,7 @@ func (app *application) routes() http.Handler {
 	// Update a specific patient
 	v1.HandleFunc("/patients/{id:[0-9]+}", app.updatePatientHandler).Methods("PUT")
 	// Delete a specific patient
-	v1.HandleFunc("/patients/{id:[0-9]+}", app.deletePatientHandler).Methods("DELETE")
+	v1.HandleFunc("/patients/{id:[0-9]+}", app.requirePermissions("patients:write", app.deletePatientHandler)).Methods("DELETE")
 
 	// Create a new clinic
 	v1.HandleFunc("/clinics", app.createClinicHandler).Methods("POST")

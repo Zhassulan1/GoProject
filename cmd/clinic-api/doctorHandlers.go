@@ -65,8 +65,7 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// TODO: add clinics read permission
-	err = app.models.Permissions.AddForUser(user.ID, "doctors:read")
+	err = app.models.Permissions.AddForUser(user.ID, "doctors:write", "clinics:read", "patients:read", "appointments:read")
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -102,6 +101,7 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// user part
 	res.Token = &token.Plaintext
 	res.User = user
 

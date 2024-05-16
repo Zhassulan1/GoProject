@@ -9,6 +9,7 @@ type Patient struct {
 	Name      string `json:"name"`
 	Birthdate string `json:"birthdate"`
 	Gender    string `json:"gender"`
+	UserID    int64  `json:"user_id"`
 }
 
 type Doctor struct {
