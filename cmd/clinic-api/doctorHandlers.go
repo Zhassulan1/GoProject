@@ -245,3 +245,20 @@ func (app *application) deleteDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 	app.writeJSON(w, http.StatusOK, envelope{"message": "success"}, nil)
 }
+
+func (app *application) getDoctorsByClinicHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clinicID, err := strconv.Atoi(vars["id"])
+	if err != nil || clinicID < 1 {
+		app.errorResponse(w, r, http.StatusBadRequest, "Invalid clinic ID")
+		return
+	}
+
+	doctors, err := app.models.Doctors.GetByClinicID(clinicID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, envelope{"doctors": doctors}, nil)
+}

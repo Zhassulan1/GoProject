@@ -66,6 +66,13 @@ func (app *application) routes() http.Handler {
 	// Delete a specific clinic
 	v1.HandleFunc("/clinics/{id:[0-9]+}", app.requirePermissions("clinics:write", app.deleteClinicHandler)).Methods("DELETE")
 
+	// Get doctors by clinic
+	v1.HandleFunc("/clinics/{id:[0-9]+}/doctors", app.getDoctorsByClinicHandler).Methods("GET")
+	// Get appointments by clinic
+	v1.HandleFunc("/doctors/{id:[0-9]+}/appointments", app.getAppointmentsByDoctorIDHandler).Methods("GET")
+	// Get appointments by patient
+	v1.HandleFunc("/patients/{id:[0-9]+}/appointments", app.getAppointmentsByPatientIDHandler).Methods("GET")
+
 	users1 := r.PathPrefix("/api/v1").Subrouter()
 	// User handlers with Authentication
 	// disabled because not needed

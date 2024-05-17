@@ -156,3 +156,57 @@ func (m AppointmentModel) Delete(id int) error {
 	_, err := m.DB.ExecContext(ctx, query, id)
 	return err
 }
+
+func (m AppointmentModel) GetByDoctorID(doctorID int) ([]*Appointment, error) {
+    query := `SELECT id, doctor_id, patient_id, datetime FROM appointments WHERE doctor_id = $1`
+
+    rows, err := m.DB.Query(query, doctorID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var appointments []*Appointment
+
+    for rows.Next() {
+        var appointment Appointment
+        err = rows.Scan(&appointment.Id, &appointment.DoctorId, &appointment.PatientId, &appointment.Date)
+        if err != nil {
+            return nil, err
+        }
+        appointments = append(appointments, &appointment)
+    }
+
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return appointments, nil
+}
+
+func (m AppointmentModel) GetByPatientID(patientID int) ([]*Appointment, error) {
+    query := `SELECT id, doctor_id, patient_id, datetime FROM appointments WHERE patient_id = $1`
+
+    rows, err := m.DB.Query(query, patientID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var appointments []*Appointment
+
+    for rows.Next() {
+        var appointment Appointment
+        err = rows.Scan(&appointment.Id, &appointment.DoctorId, &appointment.PatientId, &appointment.Date)
+        if err != nil {
+            return nil, err
+        }
+        appointments = append(appointments, &appointment)
+    }
+
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return appointments, nil
+}
