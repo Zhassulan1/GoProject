@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -38,9 +36,9 @@ func (app *application) routes() http.Handler {
 	// Create a new doctor
 	v1.HandleFunc("/doctors", app.createDoctorHandler).Methods("POST")
 	// Get a doctors list by pagination and filters
-	v1.HandleFunc("/doctors", app.SearchDoctorHandler).Methods("GET")
+	v1.HandleFunc("/doctors", app.requirePermissions("doctors:read", app.SearchDoctorHandler)).Methods("GET")
 	// Get a specific doctor
-	v1.HandleFunc("/doctors/{id:[0-9]+}", app.getDoctorHandler).Methods("GET")
+	v1.HandleFunc("/doctors/{id:[0-9]+}", app.requirePermissions("doctors:read", app.getDoctorHandler)).Methods("GET")
 	// Update a specific doctor
 	v1.HandleFunc("/doctors/{id:[0-9]+}", app.requirePermissions("doctors:write", app.updateDoctorHandler)).Methods("PUT")
 	// Delete a specific doctor
@@ -60,9 +58,9 @@ func (app *application) routes() http.Handler {
 	// Create a new clinic
 	v1.HandleFunc("/clinics", app.createClinicHandler).Methods("POST")
 	// Get a specific clinic
-	v1.HandleFunc("/clinics/{id:[0-9]+}", app.getClinicHandler).Methods("GET")
+	v1.HandleFunc("/clinics/{id:[0-9]+}", app.requirePermissions("clinics:read", app.getClinicHandler)).Methods("GET")
 	// Get a clinics list by pagination and filters
-	v1.HandleFunc("/clinics", app.searchClinicHandler).Methods("GET")
+	v1.HandleFunc("/clinics", app.requirePermissions("clinics:read", app.searchClinicHandler)).Methods("GET")
 	// Update a specific clinic
 	v1.HandleFunc("/clinics/{id:[0-9]+}", app.requirePermissions("clinics:write", app.updateClinicHandler)).Methods("PUT")
 	// Delete a specific clinic
@@ -75,11 +73,11 @@ func (app *application) routes() http.Handler {
 	users1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
 	users1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
 
-	log.Printf("Starting server on %s\n", app.config.port)
+	// log.Printf("Starting server on %s\n", app.config.port)
 
-	err := http.ListenAndServe(app.config.port, r)
+	// err := http.ListenAndServe(app.config.port, r)
 
-	log.Fatal("ListenAndServe Err: ", err)
+	// log.Fatal("ListenAndServe Err: ", err)
 
 	return app.authenticate(r)
 }

@@ -14,7 +14,7 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=1234
-      - DB_NAME=midicalclinic
+      - DB_NAME=medicalclinic
     
 
   db:
