@@ -73,10 +73,8 @@ func (app *application) routes() http.Handler {
 	users1.HandleFunc("/users/activated", app.activateUserHandler).Methods("PUT")
 	users1.HandleFunc("/users/login", app.createAuthenticationTokenHandler).Methods("POST")
 
-	// log.Printf("Starting server on %s\n", app.config.port)
-
+	//! If error uncomment below
 	// err := http.ListenAndServe(app.config.port, r)
-
 	// log.Fatal("ListenAndServe Err: ", err)
 
 	return app.authenticate(r)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -60,6 +61,8 @@ func (app *application) createDoctorHandler(w http.ResponseWriter, r *http.Reque
 
 			app.failedValidationResponse(w, r, v.Errors)
 		default:
+
+			fmt.Print("\n\nError you are looking for: ", err, "\n", reflect.TypeOf(err), "\n\n")
 			app.serverErrorResponse(w, r, err)
 		}
 		return

@@ -93,11 +93,14 @@ func (m UserModel) Insert(user *User) error {
 	// perform the insert there will be a violation of the UNIQUE "users_email_key" constraint
 	// that we set up in the previous chapter. We check for this error specifically, and return
 	// ErrDuplicateEmail error instead.
+	// sometimes pq returns error in russian, sometimes in english:
 	pqErr := `pq: duplicate key value violates unique constraint "users_email_key"`
+	pqErr2 := `pq: повторяющееся значение ключа нарушает ограничение уникальности "users_email_key"`
+
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
 	if err != nil {
 		switch {
-		case err.Error() == pqErr:
+		case err.Error() == pqErr || err.Error() == pqErr2:
 			return ErrDuplicateEmail
 		default:
 			return err
