@@ -48,9 +48,9 @@ func main() {
 		cfg        config
 		fill       = fs.Bool("fill", false, "Fill database with dummy data")
 		migrations = fs.String("migrations", "", "Path to migration files folder. If not provided, migrations do not applied")
-		port       = fs.String("port", ":8060", "API server port")
+		port       = fs.String("port", ":8081", "API server port")
 		env        = fs.String("env", "development", "Environment (development|staging|production)")
-		dbDsn      = fs.String("dsn", "postgres://postgres:Yekanai11@localhost:5432/medicalclinic?sslmode=disable", "PostgreSQL DSN")
+		dbDsn      = fs.String("dsn", "postgres://postgres:1234@localhost:5432/medicalclinic?sslmode=disable", "PostgreSQL DSN")
 	)
 
 	// Init logger
