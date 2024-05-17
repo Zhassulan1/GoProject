@@ -135,3 +135,30 @@ func (m DoctorModel) Delete(id int) error {
 	_, err := m.DB.ExecContext(ctx, query, id)
 	return err
 }
+
+func (m DoctorModel) GetByClinicID(clinicID int) ([]*Doctor, error) {
+    query := `SELECT id, name, specialty FROM doctors WHERE clinic_id = $1`
+
+    rows, err := m.DB.Query(query, clinicID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var doctors []*Doctor
+
+    for rows.Next() {
+        var doctor Doctor
+        err = rows.Scan(&doctor.Id, &doctor.Name, &doctor.Specialty)
+        if err != nil {
+            return nil, err
+        }
+        doctors = append(doctors, &doctor)
+    }
+
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return doctors, nil
+}
