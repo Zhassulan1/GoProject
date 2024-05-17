@@ -189,3 +189,41 @@ func (app *application) deleteAppointmentHandler(w http.ResponseWriter, r *http.
 	app.writeJSON(w, http.StatusOK, envelope{"message": "success"}, nil)
 
 }
+
+func (app *application) getAppointmentsByDoctorIDHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    param := vars["id"]
+
+    doctorID, err := strconv.Atoi(param)
+    if err != nil || doctorID < 1 {
+        app.errorResponse(w, r, http.StatusBadRequest, "Invalid doctor ID")
+        return
+    }
+
+    appointments, err := app.models.Appointments.GetByDoctorID(doctorID)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    }
+
+    app.writeJSON(w, http.StatusOK, envelope{"appointments": appointments}, nil)
+}
+
+func (app *application) getAppointmentsByPatientIDHandler(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    param := vars["id"]
+
+    patientID, err := strconv.Atoi(param)
+    if err != nil || patientID < 1 {
+        app.errorResponse(w, r, http.StatusBadRequest, "Invalid patient ID")
+        return
+    }
+
+    appointments, err := app.models.Appointments.GetByPatientID(patientID)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    }
+
+    app.writeJSON(w, http.StatusOK, envelope{"appointments": appointments}, nil)
+}
