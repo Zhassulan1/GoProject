@@ -3,9 +3,9 @@ package model
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
-	"fmt"
 )
 
 type PatientModel struct {
@@ -16,15 +16,16 @@ type PatientModel struct {
 
 func (m PatientModel) Insert(patient *Patient) error {
 	query := `
-		INSERT INTO patients (name, birthdate, gender) 
-		VALUES ($1, $2, $3) 
-		RETURNING id, created_at, updated_at
+		INSERT INTO patients (name, birthdate, gender, user_id) 
+		VALUES ($1, $2, $3, $4) 
+		RETURNING id, created_at, updated_at, user_id
 		`
 
 	args := []interface{}{
 		patient.Name,
 		patient.Birthdate,
 		patient.Gender,
+		patient.UserID,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -34,6 +35,7 @@ func (m PatientModel) Insert(patient *Patient) error {
 		&patient.Id,
 		&patient.CreatedAt,
 		&patient.UpdatedAt,
+		&patient.UserID,
 	)
 }
 

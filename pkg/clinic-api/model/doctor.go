@@ -16,11 +16,17 @@ type DoctorModel struct {
 
 func (m DoctorModel) Insert(doctor *Doctor) error {
 	query := `
-		INSERT INTO doctors (name, specialty, clinic_id) 
-		VALUES ($1, $2, $3) 
-		RETURNING id, created_at, updated_at
+		INSERT INTO doctors (name, specialty, clinic_id, user_id) 
+		VALUES ($1, $2, $3, $4) 
+		RETURNING id, created_at, updated_at, user_id
 		`
-	args := []interface{}{doctor.Name, doctor.Specialty, doctor.ClinicID}
+	args := []interface{}{
+		doctor.Name,
+		doctor.Specialty,
+		doctor.ClinicID,
+		doctor.UserID,
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -28,6 +34,7 @@ func (m DoctorModel) Insert(doctor *Doctor) error {
 		&doctor.Id,
 		&doctor.CreatedAt,
 		&doctor.UpdatedAt,
+		&doctor.UserID,
 	)
 }
 

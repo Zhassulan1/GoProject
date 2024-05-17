@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS patients
     birthdate  DATE                        NOT NULL,
     gender     TEXT                        NOT NULL,
     created_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now()
+    updated_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now(),
+    user_id    INT REFERENCES users (id)
 );
 
 
@@ -26,7 +27,8 @@ CREATE TABLE IF NOT EXISTS doctors
     name       TEXT                        NOT NULL,
     specialty  TEXT                        NOT NULL,
     created_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now()
+    updated_at TIMESTAMP(0) with time zone NOT NULL DEFAULT now(),
+    user_id    INT REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS appointments
